@@ -1,0 +1,159 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Sale batch regression checks</title></head><body>
+<form id="cash"><table><tbody><tr><td><select class="product" name="items[0][product]"><option value="">Select</option><option value="10">Test product</option></select><input class="inventory_id"><input class="purchase_price"><input class="unit_price"><input class="original_unit_price"><input class="hire_price"><input class="quantity" value="1"><input class="available_quantity"><input class="gross_amount"><input class="net_amount"><select class="serial_select" name="items[0][serial_card_no]"></select><select class="warranty_select"></select><input class="warranty_period"><input class="additional_warranty_description"><input type="file" name="items[0][warranty_document]"></td></tr></tbody></table></form>
+<form id="hire"><div class="input-group"><select id="product" name="product"><option value="">Select</option><option value="10">Test product</option></select></div><input id="inventory_id"><input id="purchase_price"><input id="unit_price"><input id="original_unit_price"><input id="original_gross_hire_price"><input id="gross_hire_price"><input id="quantity" value="1"><input id="available_quantity"><select id="serial_select" name="serial_card_no"></select><select id="warranty_select"></select><input name="warranty_period"><input name="additional_warranty_description"><input type="file" name="warranty_document"></form>
+<pre id="result">RUNNING</pre>
+<script src="../public/assets/modules/jquery.min.js"></script>
+<script src="../public/assets/modules/popper.js"></script>
+<script src="../public/assets/modules/bootstrap/js/bootstrap.min.js"></script>
+<script src="../public/assets/modules/selectpicker/bootstrap-select.min.js"></script>
+<script src="../public/assets/js/sale-warranty.js"></script><script src="../public/assets/js/sale-batches.js"></script>
+<script>
+window.AppMessages = {warning: function (message) { throw new Error(message); }};
+var batches = [
+ {id:1,code:'B000001',date:'2026-11-01',invoice_number:'INV',purchase_price:500,sale_price:700,hire_price:966,remain_qty:3,available_qty:3,units:[{id:11,serial_number:'OLD',warranty_number:'OLD-CARD',warranty_period:12,warranty_document:'assets/documents/warranty/old.pdf'}]},
+ {id:2,code:'B000002',date:'2026-11-06',invoice_number:'INV',purchase_price:100,sale_price:150,hire_price:207,remain_qty:2,available_qty:2,units:[{id:22,serial_number:'NEW',warranty_number:'NEW-CARD',warranty_period:6,warranty_document:'assets/documents/warranty/new.pdf'}]}
+];
+$.getJSON = function () { return $.Deferred().resolve({name:'Test product',batches:batches}).promise(); };
+function check(test, message) { if (!test) throw new Error(message); }
+try {
+ $('#cash select, #hire select').addClass('selectpicker').selectpicker();
+ SaleBatches.install({cash:true,url:'/batches',rows:[]});
+ SaleBatches.install({cash:false,url:'/batches',rows:[]});
+ ['cash','hire'].forEach(function (mode) {
+   var scope = $('#' + mode), cash = mode === 'cash';
+   scope.find(cash ? 'select.product' : '#product').val('10').trigger('change');
+   var qty = scope.find(cash ? '.available_quantity' : '#available_quantity');
+   var price = scope.find(cash ? '.unit_price' : '#unit_price');
+   var batch = scope.find('.sale-batch-select');
+   check(!scope.find('.sale-batch-group').hasClass('d-none'), mode + ': different prices require batch dropdown');
+   check(qty.val() === '5', mode + ': total stock before batch selection');
+   check(price.val() === '', mode + ': price stays blank until batch selection');
+   check(!scope.find('.grn-warranty-document').length, mode + ': no default document');
+   batch.val('1').trigger('change');
+   check(qty.val() === '3' && price.val() === '700.00', mode + ': old batch quantity and price');
+   check(!scope.find('.grn-warranty-document').length, mode + ': batch alone does not select document');
+   scope.find(cash ? 'select.serial_select' : '#serial_select').prop('selectedIndex',1).trigger('change');
+   check(scope.find('.grn-warranty-document').attr('href') === '/assets/documents/warranty/old.pdf', mode + ': selected unit document');
+   batch.val('2').trigger('change');
+   check(qty.val() === '2' && price.val() === '150.00', mode + ': new batch quantity and price');
+   check(scope.find(cash ? 'select.serial_select' : '#serial_select').find('option').length === 2, mode + ': serials filtered to selected batch');
+   check(!scope.find('.grn-warranty-document').length, mode + ': changing batch clears old document');
+   scope.find(cash ? 'select.warranty_select' : '#warranty_select').prop('selectedIndex',1).trigger('change');
+   check(scope.find('.grn-warranty-document').attr('href') === '/assets/documents/warranty/new.pdf', mode + ': warranty card selects matching document');
+   batch.val('').trigger('change');
+   check(qty.val() === '5' && price.val() === '', mode + ': clearing batch restores total and clears price');
+   check(!scope.find('.grn-warranty-document').length, mode + ': clearing batch removes document');
+ });
+ $('#product').val('10'); $('#inventory_id').val(2); $('#unit_price').val('160.00');
+ SaleBatches.install({cash:false,url:'/batches',saleId:1,rows:[{id:1,inventory_id:2}],warrantyId:22,snapshot:{warranty_period:3,warranty_document:'assets/documents/warranty/sale-copy.pdf'}});
+ check($('#hire .sale-batch-select').val() === '2', 'edit restores original batch');
+ check($('#unit_price').val() === '160.00', 'edit preserves saved price');
+ check($('#hire .grn-warranty-document').attr('href') === '/assets/documents/warranty/sale-copy.pdf', 'edit preserves saved warranty document');
+ batches = [batches[0]];
+ ['cash','hire'].forEach(function (mode) {
+   var cash = mode === 'cash', scope = $('#' + mode);
+   scope.find(cash ? 'select.product' : '#product').trigger('change');
+   check(scope.find('.sale-batch-select').val() === '1', mode + ': sole batch selected automatically');
+   check(scope.find('.sale-batch-group').hasClass('d-none'), mode + ': no dropdown for sole batch');
+   check(scope.find(cash ? '.unit_price' : '#unit_price').val() === '700.00', mode + ': sole batch price filled');
+   check(scope.find(cash ? '.available_quantity' : '#available_quantity').val() === '3', mode + ': sole batch quantity filled');
+   check(!scope.find('.grn-warranty-document').length, mode + ': document still requires a serial selection');
+ });
+ var another = JSON.parse(JSON.stringify(batches[0]));
+ another.id = 3; another.available_qty = 2;
+ another.units = [{id:33,serial_number:'SAME-PRICE',warranty_number:'CARD-33',warranty_document:'assets/documents/warranty/another.pdf'}];
+ batches.push(another);
+ ['cash','hire'].forEach(function (mode) {
+   var cash = mode === 'cash', scope = $('#' + mode);
+   scope.find(cash ? 'select.product' : '#product').trigger('change');
+   check(!scope.find('.sale-batch-group').hasClass('d-none'), mode + ': multiple batches show batch dropdown');
+   check(scope.find(cash ? '.available_quantity' : '#available_quantity').val() === '5', mode + ': total quantity before batch selection');
+   scope.find('.sale-batch-select').val('3').trigger('change');
+   check(scope.find(cash ? '.available_quantity' : '#available_quantity').val() === '2', mode + ': batch quantity after batch selection');
+   check(scope.find(cash ? '.unit_price' : '#unit_price').val() === '700.00', mode + ': batch prices auto-fill');
+   scope.find(cash ? 'select.serial_select' : '#serial_select').prop('selectedIndex',1).trigger('change');
+   check(scope.find(cash ? '.available_quantity' : '#available_quantity').val() === '2', mode + ': serial uses correct batch balance');
+ });
+ batches = [Object.assign({}, batches[0], {hire_price:null})];
+ $('#cash select.product').trigger('change');
+ check($('#cash .hire_price').val() === '700.00', 'legacy cash receipt without retail price uses recorded cash price');
+
+ // Multi-row cash sales allocation tests
+ batches = [
+  {id:1,code:'B001',date:'2026-11-01',purchase_price:500,sale_price:700,hire_price:900,available_qty:2},
+  {id:2,code:'B002',date:'2026-11-02',purchase_price:500,sale_price:700,hire_price:900,available_qty:3}
+ ];
+ $('#cash table').wrap('<div id="cash_sale_items"></div>');
+ $('#cash tbody').html(
+  '<tr class="cash-sale-item-row" data-repeater-item>' +
+    '<td><select class="product" name="items[0][product]"><option value="10">Test product</option></select>' +
+    '<input class="quantity" value="1"><input class="available_quantity">' +
+    '<input class="inventory_id"><input class="batch_id"><input class="hire_price"><input class="unit_price"><input class="purchase_price">' +
+    '</td>' +
+  '</tr>' +
+  '<tr class="cash-sale-item-row" data-repeater-item>' +
+    '<td><select class="product" name="items[1][product]"><option value="10">Test product</option></select>' +
+    '<input class="quantity" value="1"><input class="available_quantity">' +
+    '<input class="inventory_id"><input class="batch_id"><input class="hire_price"><input class="unit_price"><input class="purchase_price">' +
+    '</td>' +
+  '</tr>'
+ );
+ SaleBatches.install({cash:true, url:'/batches', rows:[]});
+ var row1 = $('#cash [data-repeater-item]').eq(0);
+ var row2 = $('#cash [data-repeater-item]').eq(1);
+ row1.find('select.product').val('10').trigger('change');
+ row2.find('select.product').val('10').trigger('change');
+
+ check(row2.find('.available_quantity').val() === '4', 'row 2 deducts row 1 quantity from total stock: ' + row2.find('.available_quantity').val());
+
+ row1.find('.sale-batch-select').val('1').trigger('change');
+ var b1Opt = row2.find('.sale-batch-select option[value="1"]').text();
+ check(b1Opt.indexOf('Available 1') !== -1, 'row 2 batch dropdown reflects row 1 batch allocation: ' + b1Opt);
+
+ row2.find('.sale-batch-select').val('1').trigger('change');
+ check(row2.find('.available_quantity').val() === '1', 'row 2 available quantity for batch 1 is 1: ' + row2.find('.available_quantity').val());
+
+ row1.find('.quantity').val('2').trigger('input');
+ check(row2.find('.available_quantity').val() === '0', 'row 2 available quantity drops to 0 when row 1 takes all batch stock: ' + row2.find('.available_quantity').val());
+
+ // Serial uniqueness and quantity locking tests:
+ batches = [{
+  id: 1, code: 'B001', date: '2026-11-01', purchase_price: 500, sale_price: 700, hire_price: 900, available_qty: 2,
+  units: [
+    { id: 11, serial_number: 'SN001', warranty_number: 'WN001' },
+    { id: 12, serial_number: 'SN002', warranty_number: 'WN002' }
+  ]
+ }];
+ $('#cash tbody').html(
+  '<tr class="cash-sale-item-row" data-repeater-item>' +
+    '<td><select class="product" name="items[0][product]"><option value="10">Test product</option></select>' +
+    '<input class="quantity" value="1"><input class="available_quantity">' +
+    '<select class="serial_select" name="items[0][serial_card_no]"></select><select class="warranty_select"></select>' +
+    '<input class="inventory_id"><input class="batch_id"><input class="hire_price"><input class="unit_price"><input class="purchase_price">' +
+    '</td>' +
+  '</tr>' +
+  '<tr class="cash-sale-item-row" data-repeater-item>' +
+    '<td><select class="product" name="items[1][product]"><option value="10">Test product</option></select>' +
+    '<input class="quantity" value="1"><input class="available_quantity">' +
+    '<select class="serial_select" name="items[1][serial_card_no]"></select><select class="warranty_select"></select>' +
+    '<input class="inventory_id"><input class="batch_id"><input class="hire_price"><input class="unit_price"><input class="purchase_price">' +
+    '</td>' +
+  '</tr>'
+ );
+ SaleBatches.install({cash:true, url:'/batches', rows:[]});
+ row1 = $('#cash [data-repeater-item]').eq(0);
+ row2 = $('#cash [data-repeater-item]').eq(1);
+ row1.find('select.product').val('10').trigger('change');
+ row2.find('select.product').val('10').trigger('change');
+
+ row1.find('select.serial_select').val('SN001').trigger('change');
+ check(row1.find('.quantity').val() === '1', 'row 1 quantity locked to 1 for serialized unit');
+ check(row1.find('.quantity').attr('max') === '1', 'row 1 quantity max is 1 for serialized unit');
+
+ var row2Sn001 = row2.find('select.serial_select option[value="SN001"]');
+ check(row2Sn001.prop('disabled') === true, 'SN001 is disabled in row 2 because row 1 selected it');
+ check(row2Sn001.text().indexOf('(Already Selected)') !== -1, 'SN001 displays (Already Selected) in row 2: ' + row2Sn001.text());
+
+ document.getElementById('result').textContent = 'PASS: Bootstrap Select wrappers, sole/same-price auto-fill, legacy cash price, serial ownership and uniqueness, multi-row stock deduction, documents and edit restore';
+} catch (error) { document.getElementById('result').textContent = 'FAIL: ' + error.message; }
+</script></body></html>
