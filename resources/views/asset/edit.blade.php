@@ -1,0 +1,71 @@
+{{ Form::model($asset, array('route' => array('asset.update', $asset->id), 'method' => 'PUT')) }}
+
+<div class="row">
+
+    <div class="form-group  col-md-6">
+        {{ Form::label('name', __('Name')) }}
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">
+                    <i class="fas fa-calculator"></i>
+                </div>
+            </div>
+            {{ Form::text('name', null, array('class' => 'form-control','required'=>'required')) }}
+        </div>
+    </div>
+
+    <div class="form-group  col-md-6">
+        {{ Form::label('amount', __('Amount')) }}
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">
+                    <i class="far fa-money-bill-alt"></i>
+                </div>
+            </div>
+            {{ Form::number('amount', null, array('class' => 'form-control','required'=>'required')) }}
+        </div>
+    </div>
+
+
+    <div class="form-group  col-md-6">
+        {{ Form::label('purchase_date', __('Purchase Date')) }}
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">
+                    <i class="fas fa-calendar"></i>
+                </div>
+            </div>
+            {{ Form::text('purchase_date', null, array('class' => 'form-control datepicker','required'=>'required')) }}
+        </div>
+    </div>
+
+    <div class="form-group  col-md-6">
+        {{ Form::label('supported_date', __('Supported Date')) }}
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">
+                    <i class="fas fa-calendar"></i>
+                </div>
+            </div>
+            {{ Form::text('supported_date', null, array('class' => 'form-control datepicker','required'=>'required')) }}
+        </div>
+    </div>
+
+    
+    <div class="form-group  col-md-12">
+        {{ Form::label('description', __('Description')) }}
+        {{ Form::textarea('description', null, array('class' => 'form-control')) }}
+    </div>
+
+</div>
+
+    <div class="col-md-12 text-right">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{__('Cancel')}}</button>
+        {{Form::submit(__('Update'),array('class'=>'btn btn-primary'))}}
+    </div>
+
+{{ Form::close() }}
+
+
+
+

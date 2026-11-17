@@ -1,0 +1,21 @@
+# Default Commit Message
+YourCommit
+
+Co-authored-by: LakshithaSankalpa <lakshithasankalpa356@gmail.com>
+Co-authored-by: G-Danushka <gayan.4d@gmail.com>
+Co-authored-by: TharinduPerera6495 <tharinduperera6495@gmail.com>
+
+# TODO:
+# - Describe the changes made in this commit
+# - Reference any issue numbers (e.g., Fixes #123)
+# Lines starting with # will be ignored by Git.
+
+# Configure Git to Use the Template Locally:
+
+# -Open the terminal in VS Code (or your preferred terminal) inside the project directory.
+# -Set the local Git configuration for the project using:
+# -git config commit.template ".gitmessage.txt"
+
+# Verify the Local Configuration:
+
+# -git config --get commit.template

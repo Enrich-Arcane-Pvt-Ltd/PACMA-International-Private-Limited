@@ -1,0 +1,55 @@
+/* Keep GRN entry readable without oversized fields stretching the page. */
+#sortable-table.grn-items-table {
+    display: table;
+    width: 100%;
+    min-width: 900px;
+    table-layout: fixed;
+}
+#sortable-table.grn-items-table th,
+#sortable-table.grn-items-table td {
+    padding: 8px 6px;
+    font-size: 12px;
+    vertical-align: top;
+    white-space: normal;
+}
+#sortable-table.grn-items-table tbody td {
+    padding-top: 12px;
+}
+#sortable-table.grn-items-table th:first-child { width: 24%; }
+#sortable-table.grn-items-table th:nth-child(2),
+#sortable-table.grn-items-table th:nth-child(4),
+#sortable-table.grn-items-table th:nth-child(5),
+#sortable-table.grn-items-table th:nth-child(6),
+#sortable-table.grn-items-table th:nth-child(7) { width: 10%; }
+#sortable-table.grn-items-table th:nth-child(3) { width: 7%; }
+#sortable-table.grn-items-table th:nth-child(8) { width: 13%; }
+#sortable-table.grn-items-table th:last-child { width: 6%; }
+#sortable-table.grn-items-table .form-control {
+    width: 100%;
+    min-width: 0 !important;
+    height: 34px;
+    padding: 5px 6px;
+    font-size: 12px;
+}
+#sortable-table.grn-items-table .selected-product-name {
+    font-size: 11px;
+    line-height: 1.35;
+}
+#sortable-table.grn-items-table .btn-action {
+    padding: 6px 8px;
+    min-width: 30px;
+}
+
+/* Edit includes a separate ordered Quantity column. */
+#sortable-table.grn-edit-items { min-width: 1000px; }
+#sortable-table.grn-edit-items th:first-child { width: 22%; }
+#sortable-table.grn-edit-items th:nth-child(2),
+#sortable-table.grn-edit-items th:nth-child(4) { width: 9%; }
+#sortable-table.grn-edit-items th:nth-child(3),
+#sortable-table.grn-edit-items th:nth-child(7) { width: 6%; }
+#sortable-table.grn-edit-items th:nth-child(5),
+#sortable-table.grn-edit-items th:nth-child(6),
+#sortable-table.grn-edit-items th:nth-child(8),
+#sortable-table.grn-edit-items th:nth-child(9) { width: 10%; }
+#sortable-table.grn-edit-items th:last-child { width: 8%; }
+#sortable-table.grn-edit-items .form-group { margin: 0; }
