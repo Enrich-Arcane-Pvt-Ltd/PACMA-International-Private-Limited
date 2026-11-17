@@ -5,6 +5,73 @@
 @section('page-title')
     {{__('Users')}}
 @endsection
+@push('css-page')
+<style>
+    .pacma-user-card {
+        background: #FFFFFF !important;
+        border: 1px solid #E2E8F0 !important;
+        border-radius: 14px !important;
+        padding: 22px 18px 20px !important;
+        margin-bottom: 22px !important;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04) !important;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    .pacma-user-card:hover {
+        border-color: #FED7AA !important;
+        box-shadow: 0 10px 24px rgba(249, 115, 22, 0.10) !important;
+        transform: translateY(-2px);
+    }
+    .pacma-user-card .contact-img img {
+        width: 72px;
+        height: 72px;
+        object-fit: cover;
+        border: 3px solid #FFF7ED;
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.16);
+    }
+    .pacma-user-card .main-info h2 {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #0F172A !important;
+        margin-top: 10px !important;
+        margin-bottom: 6px !important;
+    }
+    .pacma-user-role-badge {
+        display: inline-block;
+        background: #FFF7ED;
+        color: #EA580C;
+        border: 1px solid #FED7AA;
+        border-radius: 999px;
+        padding: 2px 12px;
+        font-size: 11.5px;
+        font-weight: 600;
+    }
+    .pacma-user-card .meta-info p {
+        color: #475569 !important;
+        font-size: 13px !important;
+        margin-bottom: 0;
+        word-break: break-word;
+    }
+    .pacma-user-card .more-action .dropdown-toggle {
+        width: 32px;
+        height: 32px;
+        padding: 0 !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px !important;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+    }
+    .pacma-user-card .more-action .dropdown-toggle:hover {
+        background: #FFF7ED;
+        border-color: #FED7AA;
+    }
+    .pacma-user-card .more-action .dropdown-toggle::after {
+        display: none;
+    }
+</style>
+@endpush
 @section('content')
     <section class="section">
         <div class="section-header">
@@ -14,21 +81,15 @@
                 <div class="breadcrumb-item">{{__('Users')}}</div>
             </div>
         </div>
-        <ul class="nav nav-pills mb-3" id="myTab3" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="test" data-toggle="tab" href="#users" role="tab" aria-controls="" aria-selected="false">{{__('Users')}}</a>
-            </li>
-        </ul>
-        <div class="tab-content">
-        <div class="row tab-pane fade fade show active" id="users" role="tabpanel" aria-labelledby="test">
+        <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <div class="d-flex justify-content-between w-100">
+                        <div class="d-flex justify-content-between align-items-center w-100">
                             <h4>{{__('Manage Users')}}</h4>
                             @can('create user')
                                 <a href="#" data-url="{{ route('users.create') }}" data-ajax-popup="true" data-title="{{__('Create New User')}}" class="btn btn-icon icon-left btn-primary">
-                                    <i class="fa fa-plus"></i> {{__('Create')}}
+                                    <i class="fa fa-plus mr-1"></i> {{__('Create')}}
                                 </a>
                             @endcan
                         </div>
@@ -39,7 +100,7 @@
                             <div class="row">
                                 @foreach($users as $user)
                                     <div class="col-lg-4 col-md-4 col-sm-6">
-                                        <div class="staff staff-grid-view pb-0">
+                                        <div class="staff staff-grid-view pacma-user-card">
                                             <div class="more-action">
                                                 @if($user->is_active==1)
                                                     <div class="dropdown">
@@ -71,11 +132,11 @@
                                             <div class="contact-img">
                                                 <img src="{{(!empty($user->avatar))? asset(Storage::url("uploads/avatar/".$user->avatar)): asset(Storage::url("uploads/avatar/avatar.png"))}}" class="rounded-circle">
                                             </div>
-                                            <div class="main-info mb-4">
-                                                <h2 class="m-0 font-style ">{{$user->name}}</h2>
-                                                <p class="font-style"> {{$user->type}}</p>
+                                            <div class="main-info mb-3">
+                                                <h2 class="m-0 font-style">{{$user->name}}</h2>
+                                                <span class="pacma-user-role-badge">{{$user->type}}</span>
                                             </div>
-                                            <div class="meta-info mb-3">
+                                            <div class="meta-info mb-2">
                                                 <p> {{$user->email}}</p>
                                                 @if($user->delete_status==0)
                                                     <p class="soft-del">{{__('Soft Deleted')}}</p>
@@ -127,10 +188,6 @@
         </div>
 
 
-        <div class="section-body">
-
-        </div>
-    </div>
     </section>
 
 @endsection

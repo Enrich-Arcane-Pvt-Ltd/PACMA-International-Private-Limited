@@ -117,7 +117,7 @@
                                         style="padding-top: 1.5rem; padding-left: 2rem;">
                                         <label class="switch">
                                             <input type="checkbox" id="fine_status" name="fine_status"
-                                                @if($fineCommand->fine_status == 1) checked @endif>
+                                                @if(optional($fineCommand)->fine_status == 1) checked @endif>
                                             <span class="slider round"></span>
                                         </label>
                                         <label style="padding-left: 1.5rem; padding-top: 3px; font-weight: bold;"
@@ -228,7 +228,7 @@
                                     <tbody>
                                         @foreach ($fineCenterCommands as $fineCenterCommand)
                                         <tr>
-                                            <td>{{ $fineCenterCommand->center->name ?? '' }}</td>
+                                            <td>{{ optional($fineCenterCommand->center)->name ?? '' }}</td>
                                             <td>{{ $fineCenterCommand->start_date ?? '' }}</td>
                                             <td>
                                                 @if ($fineCenterCommand->fine_status == 1)
