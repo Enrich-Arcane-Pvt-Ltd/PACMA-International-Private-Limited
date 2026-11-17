@@ -4,8 +4,124 @@
     {{ __('Sales & Collection Summary') }}
 @endsection
 
+@push('css-page')
+<style>
+    .pacma-print-header {
+        display: none;
+    }
+    @media print {
+        @page {
+            size: A4 portrait;
+            margin: 10mm 12mm;
+        }
+        body, #app, .main-wrapper, .main-content, .section {
+            background: #fff !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow: visible !important;
+        }
+        .main-sidebar,
+        .main-navbar,
+        .pacma-topbar-wrap,
+        .bg-main_2,
+        .section-header,
+        .section-header-breadcrumb,
+        .pacma-summary-filter,
+        .main-footer,
+        .no-print {
+            display: none !important;
+        }
+        .pacma-print-header {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #F97316;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+        .pacma-print-header img {
+            height: 46px;
+            object-fit: contain;
+        }
+        .pacma-print-header .ph-center {
+            text-align: center;
+            flex: 1;
+        }
+        .pacma-print-header h2 {
+            margin: 0 0 2px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0F172A;
+        }
+        .pacma-print-header p {
+            margin: 0;
+            font-size: 11px;
+            color: #475569;
+        }
+        .pacma-kpi-row {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            margin-left: -6px !important;
+            margin-right: -6px !important;
+            margin-bottom: 12px !important;
+        }
+        .pacma-kpi-row > div {
+            flex: 0 0 25% !important;
+            max-width: 25% !important;
+            padding-left: 6px !important;
+            padding-right: 6px !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #CBD5E1 !important;
+            border-radius: 8px !important;
+            break-inside: avoid;
+            margin-bottom: 12px !important;
+        }
+        .pacma-kpi-row .card-body {
+            padding: 10px 12px !important;
+        }
+        .pacma-kpi-row h4 {
+            font-size: 14px !important;
+        }
+        .table-responsive {
+            overflow: visible !important;
+        }
+        .table thead th,
+        .table tbody td,
+        .table tfoot td {
+            padding: 6px 8px !important;
+            font-size: 11px !important;
+            white-space: normal !important;
+            border: 1px solid #CBD5E1 !important;
+        }
+        .table thead th {
+            background-color: #F1F5F9 !important;
+            color: #0F172A !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
     <section class="section">
+        <div class="pacma-print-header">
+            <img src="{{ asset('storage/uploads/logo/logo.png') }}" alt="PACMA">
+            <div class="ph-center">
+                <h2>PACMA International Private Limited</h2>
+                <p>No: 61, K C De Silvapuraya, Thimbirigaskatuwa</p>
+                <p style="font-weight: 700; color: #0F172A; margin-top: 3px;">{{ __('Furniture & Electronic System Summary') }}</p>
+            </div>
+            <div style="text-align: right; font-size: 10.5px; color: #475569;">
+                <div><strong>Branch:</strong> {{ $branchId && isset($branches[$branchId]) ? $branches[$branchId] : __('All Branches') }}</div>
+                <div><strong>Printed:</strong> {{ date('Y-m-d H:i') }}</div>
+            </div>
+        </div>
+
         <div class="section-header">
             <h1>{{ __('Furniture & Electronic System Summary') }}</h1>
             <div class="section-header-breadcrumb">
@@ -14,7 +130,7 @@
             </div>
         </div>
 
-        <div class="card mb-4">
+        <div class="card mb-4 pacma-summary-filter">
             <div class="card-body">
                 <form method="GET" action="{{ route('pacma.summary.index') }}" class="row align-items-end">
                     <div class="col-md-3 mb-2">
@@ -55,7 +171,7 @@
             <h5 class="font-weight-bold text-dark">{{ $periodLabel }}</h5>
         </div>
 
-        <div class="row">
+        <div class="row pacma-kpi-row">
             <div class="col-lg-3 col-md-6">
                 <div class="card">
                     <div class="card-body">
