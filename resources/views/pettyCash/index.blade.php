@@ -44,18 +44,15 @@
             <div class="col-12">
                 <div class="card br-4 cus_show">
                     <div class="card-header">
-                        <div class="d-flex justify-content-between w-100">
-                            <div class="col"></div>
-                            <div class="col-auto text-right" style="border-right: 1px Solid">
-                                <h4>{{__('Petty Cash Float')}}</h4><br>
-                                <h6>{{ number_format($pettyCashFund->fund_amount ?? 0, 2) }}</h6>
+                        <div class="d-flex justify-content-center align-items-center w-100 py-1">
+                            <div class="px-4 text-right" style="border-right: 1px solid #CBD5E1;">
+                                <h6 class="text-muted text-uppercase small font-weight-bold mb-1">{{__('Petty Cash Float')}}</h6>
+                                <h5 class="mb-0 font-weight-bold">{{ number_format($pettyCashFund->fund_amount ?? 0, 2) }}</h5>
                             </div>
-                            <div class="col-auto text-left" style="border-left: 1px Solid">
-                                <h4>{{__('Balance Amount')}}</h4><br>
-                                <h6>{{ number_format($pettyCashFund->balance_amount ?? 0, 2) }}</h6>
+                            <div class="px-4 text-left">
+                                <h6 class="text-muted text-uppercase small font-weight-bold mb-1">{{__('Balance Amount')}}</h6>
+                                <h5 class="mb-0 font-weight-bold text-primary">{{ number_format($pettyCashFund->balance_amount ?? 0, 2) }}</h5>
                             </div>
-                            <!--pettyCashFund-->
-                            <div class="col"></div>
                         </div>
                     </div>
                 </div>

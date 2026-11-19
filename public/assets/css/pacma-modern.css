@@ -291,6 +291,26 @@ body.sidebar-mini .main-sidebar .sidebar-menu li ul.dropdown-menu li ul.dropdown
     box-shadow: none !important;
 }
 
+/* Nested Submenus Inside Sidebar Dropdowns (e.g. Payments -> Expenses -> Payment Voucher) */
+.main-sidebar .sidebar-menu li ul.dropdown-menu li ul.dropdown-menu,
+.main-sidebar .sidebar-menu li.active ul.dropdown-menu li ul.dropdown-menu {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 2px 0 4px 0 !important;
+    padding: 0 0 0 14px !important;
+    position: static !important;
+    float: none !important;
+    width: 100% !important;
+}
+
+.main-sidebar .sidebar-menu li ul.dropdown-menu li > a.has-dropdown {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    position: relative !important;
+}
+
 /* Top-right floating action bar & modern icons */
 .bg-main_2 {
     background: rgba(255, 255, 255, 0.98) !important;
