@@ -154,12 +154,10 @@
                                                                     @can('view sale')
                                                                         <a href="{{ url('hire_purchase_contract/view', $contract->id) }}"
                                                                             class="btn btn-info btn-action mr-1" title="{{ __('View') }}"><i
-                                                                                class="fas fa-eye"
-                                                                                style="margin-top: 5px;"></i></a>
+                                                                                class="fas fa-eye"></i></a>
                                                                         <a href="{{ route('hire_purchase_contract.print', $contract->invoice_id) }}"
                                                                             target="_blank" class="btn btn-primary btn-action mr-1" title="{{ __('Print Contract') }}"><i
-                                                                                class="fas fa-file-contract"
-                                                                                style="margin-top: 5px;"></i></a>
+                                                                                class="fas fa-file-contract"></i></a>
                                                                         <div class="btn-group">
                                                                             <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                                                 <i class="fas fa-print mr-1"></i> {{ __('Forms') }}

@@ -800,3 +800,13 @@ $(document).ready(function () {
         }
     });
 });
+
+// Keep DataTables controls (Search, Show entries, Pagination) fixed while only the table scrolls horizontally
+$(document).on('init.dt', function (e, settings) {
+    var wrapper = $(settings.nTableWrapper);
+    wrapper.parents('.table-responsive').css('overflow-x', 'visible');
+    var tableEl = wrapper.find('table.dataTable').first();
+    if (tableEl.length && !tableEl.parent().hasClass('dt-table-scroll')) {
+        tableEl.wrap('<div class="dt-table-scroll" style="width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;"></div>');
+    }
+});

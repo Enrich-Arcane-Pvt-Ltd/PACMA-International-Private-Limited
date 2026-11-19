@@ -317,6 +317,7 @@ class GrnController extends Controller
                     $amount,
                     'credit'
                 );
+                \App\AccountTransaction::where('grn_id', $newGrn->id)->update(['status' => 0]);
             }
 
             if (!empty($request->order_id)) {
@@ -693,6 +694,7 @@ class GrnController extends Controller
             if ($inventoryIds->isNotEmpty()) {
                 StockTransaction::whereIn('inventory_id', $inventoryIds)->update(['status' => 1]);
             }
+            \App\AccountTransaction::where('grn_id', $grn->id)->update(['status' => 1]);
         });
 
         return redirect()->back()->with('success', __('GRN approved by Head Office and stock activated.'));
@@ -716,6 +718,7 @@ class GrnController extends Controller
             if ($inventoryIds->isNotEmpty()) {
                 StockTransaction::whereIn('inventory_id', $inventoryIds)->update(['status' => 0]);
             }
+            Utility::deleteAccountGrnTransaction($grn->id);
         });
 
         return redirect()->back()->with('success', __('GRN rejected by Head Office.'));

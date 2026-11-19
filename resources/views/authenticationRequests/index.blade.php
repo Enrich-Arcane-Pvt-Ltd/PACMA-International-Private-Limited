@@ -244,12 +244,348 @@
                                                     @endif
                                                 </tr>
                                                 @endforeach
+                                                @foreach ($itemReturns ?? [] as $itemReturn)
+                                                <tr>
+                                                    <td class="font-style">
+                                                        <a href="#" class="text-primary font-weight-bold" data-size="2xl" data-url="{{ route('item_return.edit', $itemReturn->id) }}" data-ajax-popup="true" data-title="{{ __('Item Return Details') }} — {{ Auth::user()->itemReturnNumberFormat($itemReturn->id) }}">
+                                                            {{ Auth::user()->itemReturnNumberFormat($itemReturn->id) }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="font-style">
+                                                        @if (($itemReturn->return_type ?? 'customer') === 'supplier')
+                                                            <span class="badge badge-warning">{{ __('Supplier Return') }}</span>
+                                                        @else
+                                                            <span class="badge badge-info">{{ __('Customer Return') }}</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="font-style">{{ $itemReturn->date }}</td>
+                                                    <td class="font-style">
+                                                        @if (($itemReturn->return_type ?? 'customer') === 'supplier')
+                                                            {{ optional($itemReturn->vender)->name ?? '-' }}
+                                                        @else
+                                                            {{ optional($itemReturn->invoice)->invoice_code ?? '-' }}
+                                                        @endif
+                                                        — {{ optional($itemReturn->product)->name ?? '' }} ({{ number_format((float) $itemReturn->amount, 2) }})
+                                                    </td>
+                                                    <td class="font-style">{{ optional(\App\User::find($itemReturn->created_by))->name ?? '-' }}</td>
+                                                    @if(Gate::check('approve authorization'))
+                                                    <td class="Action text-right" style="white-space: nowrap;">
+                                                        <form method="POST" action="{{ route('item_return.approve', $itemReturn->id) }}" class="d-inline">
+                                                            @csrf
+                                                            <button type="button" class="btn btn-success btn-action mr-1 btn-approve-confirm" data-title="{{ __('Approve Item Return?') }}" data-text="{{ __('Are you sure you want to approve this Item Return?') }}" data-toggle="tooltip" data-original-title="{{ __('Approve') }}">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form method="POST" action="{{ route('item_return.reject', $itemReturn->id) }}" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="rejection_reason" value="">
+                                                            <button type="button" class="btn btn-danger btn-action btn-reject-auth-return" data-toggle="tooltip" data-original-title="{{ __('Reject') }}">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                    @endif
+                                                </tr>
+                                                @endforeach
+                                                @foreach ($pendingGrns ?? [] as $grn)
+                                                <tr>
+                                                    <td class="font-style">
+                                                        <a href="{{ route('grn.show', $grn->id) }}" class="text-primary font-weight-bold" target="_blank" rel="noopener">
+                                                            {{ Auth::user()->grnNumberFormat($grn->id) }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="font-style">
+                                                        <span class="badge badge-primary">{{ __('GRN') }}</span>
+                                                    </td>
+                                                    <td class="font-style">{{ $grn->order_date }}</td>
+                                                    <td class="font-style">
+                                                        {{ optional($grn->vender)->name ?? '-' }}
+                                                        @if (!empty($grn->supplier_invoice_number))
+                                                            — {{ $grn->supplier_invoice_number }}
+                                                        @endif
+                                                        ({{ number_format((float) $grn->total_amount, 2) }})
+                                                    </td>
+                                                    <td class="font-style">{{ optional(\App\User::find($grn->created_by))->name ?? '-' }}</td>
+                                                    @if(Gate::check('approve authorization'))
+                                                    <td class="Action text-right" style="white-space: nowrap;">
+                                                        <form method="POST" action="{{ route('grn.approve_ho', $grn->id) }}" class="d-inline">
+                                                            @csrf
+                                                            <button type="button" class="btn btn-success btn-action mr-1 btn-approve-confirm" data-title="{{ __('Approve GRN?') }}" data-text="{{ __('Are you sure you want to approve this GRN?') }}" data-toggle="tooltip" data-original-title="{{ __('Approve') }}">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form method="POST" action="{{ route('grn.reject_ho', $grn->id) }}" class="d-inline">
+                                                            @csrf
+                                                            <button type="button" class="btn btn-danger btn-action btn-reject-confirm" data-title="{{ __('Reject GRN?') }}" data-text="{{ __('Are you sure you want to reject this GRN?') }}" data-toggle="tooltip" data-original-title="{{ __('Reject') }}">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                    @endif
+                                                </tr>
+                                                @endforeach
+                                                @foreach ($pendingStockAdjustments ?? [] as $adj)
+                                                <tr>
+                                                    <td class="font-style">
+                                                        <a href="{{ route('stock.batch', $adj->inventory_id) }}" class="text-primary font-weight-bold" target="_blank" rel="noopener">
+                                                            SA{{ str_pad($adj->id, 5, '0', STR_PAD_LEFT) }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="font-style">
+                                                        <span class="badge {{ $adj->action === 'add' ? 'badge-success' : 'badge-warning' }}">
+                                                            {{ $adj->action === 'add' ? __('Stock Add') : __('Stock Deduct') }}
+                                                        </span>
+                                                    </td>
+                                                    <td class="font-style">{{ $adj->date }}</td>
+                                                    <td class="font-style">
+                                                        {{ optional(optional($adj->inventory)->products)->name ?? ('Inventory #' . $adj->inventory_id) }}
+                                                        — Qty: <strong>{{ $adj->quantity }}</strong>
+                                                        @if (!empty($adj->description))
+                                                            ({{ $adj->description }})
+                                                        @endif
+                                                    </td>
+                                                    <td class="font-style">{{ optional(\App\User::find($adj->created_by))->name ?? '-' }}</td>
+                                                    @if(Gate::check('approve authorization'))
+                                                    <td class="Action text-right" style="white-space: nowrap;">
+                                                        <form method="POST" action="{{ route('stock_adjustment.approve', $adj->id) }}" class="d-inline">
+                                                            @csrf
+                                                            <button type="button" class="btn btn-success btn-action mr-1 btn-approve-confirm" data-title="{{ __('Approve Stock Adjustment?') }}" data-text="{{ __('Are you sure you want to approve this stock adjustment?') }}" data-toggle="tooltip" data-original-title="{{ __('Approve') }}">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form method="POST" action="{{ route('stock_adjustment.reject', $adj->id) }}" class="d-inline">
+                                                            @csrf
+                                                            <input type="hidden" name="rejection_reason" value="">
+                                                            <button type="button" class="btn btn-danger btn-action btn-reject-auth-return" data-toggle="tooltip" data-original-title="{{ __('Reject') }}">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                    @endif
+                                                </tr>
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-3">
+                <div class="card br-4 cus_show">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between w-100">
+                            <h4>{{__('Processed Requests (Approved / Rejected)')}}</h4>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-flush" id="processed_requests_table">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>{{__('#')}}</th>
+                                        <th>{{__('Category')}}</th>
+                                        <th>{{__('Date')}}</th>
+                                        <th>{{__('Details')}}</th>
+                                        <th>{{__('Created By')}}</th>
+                                        <th class="text-center">{{__('Status')}}</th>
+                                        <th>{{__('Actioned By')}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($processedItemReturns ?? [] as $itemReturn)
+                                    <tr>
+                                        <td class="font-style">
+                                            <a href="#" class="text-primary font-weight-bold" data-size="2xl" data-url="{{ route('item_return.edit', $itemReturn->id) }}" data-ajax-popup="true" data-title="{{ __('Item Return Details') }} — {{ Auth::user()->itemReturnNumberFormat($itemReturn->id) }}">
+                                                {{ Auth::user()->itemReturnNumberFormat($itemReturn->id) }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            @if (($itemReturn->return_type ?? 'customer') === 'supplier')
+                                                <span class="badge badge-warning">{{ __('Supplier Return') }}</span>
+                                            @else
+                                                <span class="badge badge-info">{{ __('Customer Return') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $itemReturn->date }}</td>
+                                        <td>
+                                            @if (($itemReturn->return_type ?? 'customer') === 'supplier')
+                                                {{ optional($itemReturn->vender)->name ?? '-' }}
+                                            @else
+                                                {{ optional($itemReturn->invoice)->invoice_code ?? '-' }}
+                                            @endif
+                                            — {{ optional($itemReturn->product)->name ?? '' }} ({{ number_format((float) $itemReturn->amount, 2) }})
+                                        </td>
+                                        <td>{{ optional(\App\User::find($itemReturn->created_by))->name ?? '-' }}</td>
+                                        <td class="text-center">
+                                            @if ((int) $itemReturn->status === 1)
+                                                <span class="badge badge-success">{{ __('Approved') }}</span>
+                                            @else
+                                                <span class="badge badge-danger">{{ __('Rejected') }}</span>
+                                                @if (!empty($itemReturn->rejection_reason))
+                                                    <small class="text-danger d-block">{{ $itemReturn->rejection_reason }}</small>
+                                                @endif
+                                            @endif
+                                        </td>
+                                        <td>
+                                            {{ optional(\App\User::find($itemReturn->approved_by))->name ?? '-' }}
+                                            @if ($itemReturn->approved_at)
+                                                <small class="text-muted d-block">{{ $itemReturn->approved_at }}</small>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+
+                                    @foreach ($processedGrns ?? [] as $grn)
+                                    <tr>
+                                        <td class="font-style">
+                                            <a href="{{ route('grn.show', $grn->id) }}" class="text-primary font-weight-bold" target="_blank" rel="noopener">
+                                                {{ Auth::user()->grnNumberFormat($grn->id) }}
+                                            </a>
+                                        </td>
+                                        <td><span class="badge badge-primary">{{ __('GRN') }}</span></td>
+                                        <td>{{ $grn->order_date }}</td>
+                                        <td>
+                                            {{ optional($grn->vender)->name ?? '-' }}
+                                            @if (!empty($grn->supplier_invoice_number))
+                                                — {{ $grn->supplier_invoice_number }}
+                                            @endif
+                                            ({{ number_format((float) $grn->total_amount, 2) }})
+                                        </td>
+                                        <td>{{ optional(\App\User::find($grn->created_by))->name ?? '-' }}</td>
+                                        <td class="text-center">
+                                            @if ($grn->approval_status === 'approved')
+                                                <span class="badge badge-success">{{ __('Approved') }}</span>
+                                            @else
+                                                <span class="badge badge-danger">{{ __('Rejected') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            {{ optional(\App\User::find($grn->approved_by))->name ?? '-' }}
+                                            @if ($grn->approved_at)
+                                                <small class="text-muted d-block">{{ $grn->approved_at }}</small>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+
+                                    @foreach ($processedSales ?? [] as $sale)
+                                    <tr>
+                                        <td>{{ Auth::user()->waittingSaleNumberFormat($sale->id) }}</td>
+                                        <td>{{ $sale->sale_type == 0 ? __('Cash Sales') : __('Hire Sales') }}</td>
+                                        <td>{{ $sale->date_of_sale }}</td>
+                                        <td>{{ optional($sale->customer)->name ?? '-' }}</td>
+                                        <td>{{ optional($sale->createdUser)->name ?? '-' }}</td>
+                                        <td class="text-center">
+                                            @if ((int) $sale->status === 3)
+                                                <span class="badge badge-danger">{{ __('Rejected') }}</span>
+                                            @else
+                                                <span class="badge badge-success">{{ __('Approved') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>-</td>
+                                    </tr>
+                                    @endforeach
+
+                                    @foreach ($processedInstallments ?? [] as $installment)
+                                    <tr>
+                                        <td>{{ Auth::user()->waittingInstallmentNumberFormat($installment->id) }}</td>
+                                        <td>{{ __('Sale Installment') }}</td>
+                                        <td>{{ $installment->date }}</td>
+                                        <td>{{ optional($installment->customer)->name ?? '-' }}</td>
+                                        <td>{{ optional($installment->createdUser)->name ?? '-' }}</td>
+                                        <td class="text-center">
+                                            @if ((int) $installment->status === 3)
+                                                <span class="badge badge-danger">{{ __('Rejected') }}</span>
+                                            @else
+                                                <span class="badge badge-success">{{ __('Approved') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>-</td>
+                                    </tr>
+                                    @endforeach
+
+                                    @foreach ($processedLoanInstallments ?? [] as $loanInstallment)
+                                    <tr>
+                                        <td>{{ Auth::user()->waittingLoanInstallmentNumberFormat($loanInstallment->id) }}</td>
+                                        <td>{{ __('Loan Installment') }}</td>
+                                        <td>{{ $loanInstallment->date }}</td>
+                                        <td>{{ optional($loanInstallment->customer)->name ?? '-' }}</td>
+                                        <td>{{ optional($loanInstallment->createdUser)->name ?? '-' }}</td>
+                                        <td class="text-center">
+                                            @if ((int) $loanInstallment->status === 3)
+                                                <span class="badge badge-danger">{{ __('Rejected') }}</span>
+                                            @else
+                                                <span class="badge badge-success">{{ __('Approved') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>-</td>
+                                    </tr>
+                                    @endforeach
+
+                                    @foreach ($processedPawningInstallments ?? [] as $pawningInstallment)
+                                    <tr>
+                                        <td>{{ Auth::user()->waittingPawningInstallmentNumberFormat($pawningInstallment->id) }}</td>
+                                        <td>{{ __('Pawning Installment') }}</td>
+                                        <td>{{ $pawningInstallment->date }}</td>
+                                        <td>{{ optional($pawningInstallment->customer)->name ?? '-' }}</td>
+                                        <td>{{ optional($pawningInstallment->createdUser)->name ?? '-' }}</td>
+                                        <td class="text-center">
+                                            @if ((int) $pawningInstallment->status === 3)
+                                                <span class="badge badge-danger">{{ __('Rejected') }}</span>
+                                            @else
+                                                <span class="badge badge-success">{{ __('Approved') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>-</td>
+                                    </tr>
+                                    @endforeach
+
+                                    @foreach ($processedStockAdjustments ?? [] as $adj)
+                                    <tr>
+                                        <td class="font-style">
+                                            <a href="{{ route('stock.batch', $adj->inventory_id) }}" class="text-primary font-weight-bold" target="_blank" rel="noopener">
+                                                SA{{ str_pad($adj->id, 5, '0', STR_PAD_LEFT) }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="badge {{ $adj->action === 'add' ? 'badge-success' : 'badge-warning' }}">
+                                                {{ $adj->action === 'add' ? __('Stock Add') : __('Stock Deduct') }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $adj->date }}</td>
+                                        <td>
+                                            {{ optional(optional($adj->inventory)->products)->name ?? ('Inventory #' . $adj->inventory_id) }}
+                                            — Qty: <strong>{{ $adj->quantity }}</strong>
+                                            @if (!empty($adj->description))
+                                                ({{ $adj->description }})
+                                            @endif
+                                        </td>
+                                        <td>{{ optional(\App\User::find($adj->created_by))->name ?? '-' }}</td>
+                                        <td class="text-center">
+                                            @if ((int) $adj->status === 1)
+                                                <span class="badge badge-success">{{ __('Approved') }}</span>
+                                            @else
+                                                <span class="badge badge-danger">{{ __('Rejected') }}</span>
+                                                @if (!empty($adj->rejection_reason))
+                                                    <small class="text-danger d-block">{{ $adj->rejection_reason }}</small>
+                                                @endif
+                                            @endif
+                                        </td>
+                                        <td>
+                                            {{ optional(\App\User::find($adj->approved_by))->name ?? '-' }}
+                                            @if ($adj->approved_at)
+                                                <small class="text-muted d-block">{{ $adj->approved_at }}</small>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -261,9 +597,68 @@
 
 </section>
 <script>
+    $(document).on('click', '.btn-approve-confirm', function () {
+        var btn = $(this);
+        var form = btn.closest('form');
+        Swal.fire({
+            title: btn.data('title') || '{{ __("Are you sure?") }}',
+            text: btn.data('text') || '',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            confirmButtonText: '{{ __("Yes, Approve") }}',
+            cancelButtonText: '{{ __("Cancel") }}'
+        }).then(function (result) {
+            if (result.isConfirmed || result.value === true) {
+                form.submit();
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-reject-confirm', function () {
+        var btn = $(this);
+        var form = btn.closest('form');
+        Swal.fire({
+            title: btn.data('title') || '{{ __("Are you sure?") }}',
+            text: btn.data('text') || '',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: '{{ __("Yes, Reject") }}',
+            cancelButtonText: '{{ __("Cancel") }}'
+        }).then(function (result) {
+            if (result.isConfirmed || result.value === true) {
+                form.submit();
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-reject-auth-return', function () {
+        var form = $(this).closest('form');
+        Swal.fire({
+            title: '{{ __("Reject Item Return") }}',
+            text: '{{ __("Enter rejection reason (optional):") }}',
+            input: 'text',
+            inputPlaceholder: '{{ __("Reason...") }}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: '{{ __("Yes, Reject") }}',
+            cancelButtonText: '{{ __("Cancel") }}'
+        }).then(function (result) {
+            if (result.isConfirmed || (typeof result.value === 'string' && !result.dismiss)) {
+                form.find('input[name="rejection_reason"]').val(result.value || '');
+                form.submit();
+            }
+        });
+    });
+
     $(document).ready(function () {
         $(".se-pre-con").fadeOut('slow');
         $('#requests_table').DataTable();
+        $('#processed_requests_table').DataTable({
+            order: []
+        });
     });
 
 </script>

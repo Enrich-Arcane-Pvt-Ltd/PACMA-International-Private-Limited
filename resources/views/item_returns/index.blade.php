@@ -62,6 +62,7 @@
                                                     <th style="text-align: center"> {{ __('Realated Account Status') }}</th>
                                                     <th style="text-align: center"> {{ __('Narration') }}</th>
                                                     <th style="text-align: center"> {{ __('Amount') }}</th>
+                                                    <th style="text-align: center"> {{ __('Approval Status') }}</th>
                                                     <th class="text-center" style="text-align: center">{{ __('Action') }}</th>
                                                 </tr>
                                             </thead>
@@ -70,9 +71,11 @@
                                                 @foreach ($itemReturns as $itemReturn)
                                                 <tr>
                                                     <td style="text-align: center">
-                                                        {{ AUth::user()->itemReturnNumberFormat($itemReturn->id) }}
+                                                        <a href="#" class="btn btn-outline-primary" data-size="2xl" data-url="{{ route('item_return.edit', $itemReturn->id) }}" data-ajax-popup="true" data-title="{{ __('Item Return Details') }} — {{ Auth::user()->itemReturnNumberFormat($itemReturn->id) }}">
+                                                            {{ Auth::user()->itemReturnNumberFormat($itemReturn->id) }}
+                                                        </a>
                                                     </td>
-                                                    <td style="text-align: center">{{ $itemReturn->date }}</td>
+                                                    <td style="text-align: center; white-space: nowrap;">{{ $itemReturn->date }}</td>
                                                     <td style="text-align: center">
                                                         @if (($itemReturn->return_type ?? 'customer') === 'supplier')
                                                             <span class="badge badge-warning">{{ __('Supplier Return') }}</span>
@@ -108,9 +111,37 @@
                                                             Debit
                                                         @endif
                                                     </td>
-                                                    <td>{{ $itemReturn->narration }}</td>
+                                                    <td style="min-width: 220px;">{{ $itemReturn->narration }}</td>
                                                     <td style="text-align: right">{{ $itemReturn->amount }}</td>
+                                                    <td style="text-align: center">
+                                                        @if ((int) $itemReturn->status === 2)
+                                                            <span class="badge badge-warning">{{ __('Pending Approval') }}</span>
+                                                        @elseif ((int) $itemReturn->status === 1)
+                                                            <span class="badge badge-success">{{ __('Approved') }}</span>
+                                                        @elseif ((int) $itemReturn->status === 3)
+                                                            <span class="badge badge-danger" title="{{ $itemReturn->rejection_reason ?? '' }}">{{ __('Rejected') }}</span>
+                                                            @if (!empty($itemReturn->rejection_reason))
+                                                                <small class="text-danger d-block">{{ $itemReturn->rejection_reason }}</small>
+                                                            @endif
+                                                        @endif
+                                                    </td>
                                                     <td class="text-center" style="white-space: nowrap;">
+                                                        @if ((int) $itemReturn->status === 2 && (\Auth::user()->can('approve authorization') || \Auth::user()->can('manage authorization') || \Auth::user()->type === 'company'))
+                                                            <form method="POST" action="{{ route('item_return.approve', $itemReturn->id) }}" class="d-inline">
+                                                                @csrf
+                                                                <button type="button" class="btn btn-success btn-action mr-1 btn-approve-return" data-toggle="tooltip" data-original-title="{{ __('Approve') }}">
+                                                                    <i class="fas fa-check"></i>
+                                                                </button>
+                                                            </form>
+                                                            <form method="POST" action="{{ route('item_return.reject', $itemReturn->id) }}" class="d-inline reject-return-form">
+                                                                @csrf
+                                                                <input type="hidden" name="rejection_reason" value="">
+                                                                <button type="button" class="btn btn-warning btn-action mr-1 btn-reject-return" data-toggle="tooltip" data-original-title="{{ __('Reject') }}">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
+
                                                         @can('edit item return')
                                                             <a href="#" class="btn btn-primary btn-action mr-1" data-size="2xl" data-url="{{ route('item_return.edit', $itemReturn->id) }}" data-ajax-popup="true" data-title="{{ __('Edit Item Return') }}" data-toggle="tooltip" data-original-title="{{ __('Edit') }}">
                                                                 <i class="fas fa-pencil-alt"></i>
@@ -142,6 +173,42 @@
 
 
 <script>
+    $(document).on('click', '.btn-approve-return', function () {
+        var form = $(this).closest('form');
+        Swal.fire({
+            title: '{{ __("Approve Item Return?") }}',
+            text: '{{ __("Are you sure you want to approve this Item Return?") }}',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            confirmButtonText: '{{ __("Yes, Approve") }}',
+            cancelButtonText: '{{ __("Cancel") }}'
+        }).then(function (result) {
+            if (result.isConfirmed || result.value === true) {
+                form.submit();
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-reject-return', function () {
+        var form = $(this).closest('form');
+        Swal.fire({
+            title: '{{ __("Reject Item Return") }}',
+            text: '{{ __("Enter rejection reason (optional):") }}',
+            input: 'text',
+            inputPlaceholder: '{{ __("Reason...") }}',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: '{{ __("Yes, Reject") }}',
+            cancelButtonText: '{{ __("Cancel") }}'
+        }).then(function (result) {
+            if (result.isConfirmed || (typeof result.value === 'string' && !result.dismiss)) {
+                form.find('input[name="rejection_reason"]').val(result.value || '');
+                form.submit();
+            }
+        });
+    });
 
         $(document).ready(function(){
         $(".se-pre-con").fadeOut('slow');

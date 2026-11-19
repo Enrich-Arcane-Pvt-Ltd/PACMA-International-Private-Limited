@@ -623,34 +623,9 @@ class PrimeEntryBookController extends Controller
 
         $inventory = Inventory::find($inventryId);
         if ($inventory) {
-            if ($command == 'add') {
-                $inventory->remain_qty = $inventory->remain_qty + $newQty;
-                $inventory->status = 1;
-            } elseif ($command == 'deduct') {
-                $newRemainQty = $inventory->remain_qty - $newQty;
-                $inventory->remain_qty = $newRemainQty;
-                if ($newRemainQty > 0) {
-                    $inventory->status = 1;
-                } else {
-                    $inventory->status = 0;
-                }
+            if ($command == 'deduct' && (float) $inventory->remain_qty < (float) $newQty) {
+                return json_encode('error');
             }
-            $inventory->update();
-
-            $stockTransaction = new StockTransaction();
-            if ($command == 'add') {
-                $stockTransaction->stock_master_id = 6;
-            } elseif ($command == 'deduct') {
-                $stockTransaction->stock_master_id = 7;
-            }
-            $stockTransaction->inventory_id = $inventryId;
-            $stockTransaction->product_id = $inventory->product_id;
-            $stockTransaction->quantity = $newQty;
-            $stockTransaction->date = $date;
-            $stockTransaction->branch_id = \Auth::user()->branchId();
-            $stockTransaction->created_by = \Auth::user()->id;
-            $stockTransaction->status = 1;
-            $stockTransaction->save();
 
             $adjustment = new StockAdjustment();
             $adjustment->date = $date;
@@ -658,6 +633,7 @@ class PrimeEntryBookController extends Controller
             $adjustment->description = $description;
             $adjustment->inventory_id = $inventryId;
             $adjustment->action = $command;
+            $adjustment->status = 2; // Pending Admin Approval
             $adjustment->branch_id = \Auth::user()->branchId();
             $adjustment->created_by = \Auth::user()->id;
             $adjustment->save();
@@ -666,6 +642,77 @@ class PrimeEntryBookController extends Controller
         } else {
             return json_encode('error');
         }
+    }
+
+    public function approveStockAdjustment($id)
+    {
+        if (!\Auth::user()->can('approve authorization') && !\Auth::user()->can('manage authorization') && \Auth::user()->type !== 'company') {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        $adjustment = StockAdjustment::findOrFail($id);
+        if ((int) $adjustment->status !== 2) {
+            return redirect()->back()->with('error', __('This Stock Adjustment has already been processed.'));
+        }
+
+        $inventory = Inventory::find($adjustment->inventory_id);
+        if (!$inventory) {
+            return redirect()->back()->with('error', __('Inventory batch not found.'));
+        }
+
+        if ($adjustment->action === 'deduct' && (float) $inventory->remain_qty < (float) $adjustment->quantity) {
+            return redirect()->back()->with('error', __('Insufficient stock available to approve this deduction.'));
+        }
+
+        \DB::transaction(function () use ($adjustment, $inventory) {
+            if ($adjustment->action == 'add') {
+                $inventory->remain_qty = $inventory->remain_qty + $adjustment->quantity;
+                $inventory->status = 1;
+            } elseif ($adjustment->action == 'deduct') {
+                $newRemainQty = $inventory->remain_qty - $adjustment->quantity;
+                $inventory->remain_qty = $newRemainQty;
+                $inventory->status = $newRemainQty > 0 ? 1 : 0;
+            }
+            $inventory->update();
+
+            $stockTransaction = new StockTransaction();
+            $stockTransaction->stock_master_id = $adjustment->action == 'add' ? 6 : 7;
+            $stockTransaction->inventory_id = $inventory->id;
+            $stockTransaction->product_id = $inventory->product_id;
+            $stockTransaction->quantity = $adjustment->quantity;
+            $stockTransaction->date = $adjustment->date;
+            $stockTransaction->branch_id = $adjustment->branch_id;
+            $stockTransaction->created_by = $adjustment->created_by;
+            $stockTransaction->status = 1;
+            $stockTransaction->save();
+
+            $adjustment->status = 1;
+            $adjustment->approved_by = \Auth::id();
+            $adjustment->approved_at = \Carbon\Carbon::now();
+            $adjustment->save();
+        });
+
+        return redirect()->back()->with('success', __('Stock Adjustment Approved Successfully!'));
+    }
+
+    public function rejectStockAdjustment(Request $request, $id)
+    {
+        if (!\Auth::user()->can('approve authorization') && !\Auth::user()->can('manage authorization') && \Auth::user()->type !== 'company') {
+            return redirect()->back()->with('error', __('Permission denied.'));
+        }
+
+        $adjustment = StockAdjustment::findOrFail($id);
+        if ((int) $adjustment->status !== 2) {
+            return redirect()->back()->with('error', __('This Stock Adjustment has already been processed.'));
+        }
+
+        $adjustment->status = 3;
+        $adjustment->rejection_reason = $request->rejection_reason ?? null;
+        $adjustment->approved_by = \Auth::id();
+        $adjustment->approved_at = \Carbon\Carbon::now();
+        $adjustment->save();
+
+        return redirect()->back()->with('success', __('Stock Adjustment Rejected.'));
     }
 
     public function generalJournalStore(Request $request)

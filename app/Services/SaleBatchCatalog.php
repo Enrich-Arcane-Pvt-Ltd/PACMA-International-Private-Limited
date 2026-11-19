@@ -53,17 +53,74 @@ class SaleBatchCatalog
         $units = ProductWarrantySerial::whereIn('grn_product_id', array_keys($lineBatches))
             ->where(function ($query) use ($unitIds) { $query->where('status', 0)->orWhereIn('id', $unitIds); })
             ->orderBy('id')->get();
-        return $batches->map(function ($batch) use ($units, $lineBatches, $quantities) {
+        $returnedBatchIds = \App\StockTransaction::whereIn('inventory_id', $batches->pluck('id'))
+            ->where('stock_master_id', 5)
+            ->where('status', 1)
+            ->pluck('inventory_id')
+            ->flip();
+
+        $mapped = $batches->map(function ($batch) use ($units, $lineBatches, $quantities, $returnedBatchIds) {
+            $isDamagedReturn = strpos((string) $batch->supplier_invoice_number, 'SRN-DMG-') === 0;
+            $isGoodReturn = strpos((string) $batch->supplier_invoice_number, 'SRN-RET-') === 0;
+            $hasReturnStock = $returnedBatchIds->has($batch->id);
+            $returnLabel = $isDamagedReturn
+                ? 'RETURNED - DAMAGED (REDUCED PRICE)'
+                : (($isGoodReturn || $hasReturnStock) ? 'RETURNED ITEM' : null);
+
+            $batchUnits = $units->filter(function ($unit) use ($lineBatches, $batch) {
+                return ($lineBatches[$unit->grn_product_id] ?? null) == $batch->id;
+            })->map(function ($unit) use ($batch) {
+                $arr = $unit->toArray();
+                $arr['inventory_id'] = $batch->id;
+                return $arr;
+            })->values()->toArray();
+
             return [
-                'id' => $batch->id, 'code' => 'B' . str_pad($batch->id, 6, '0', STR_PAD_LEFT),
-                'product_id' => $batch->product_id, 'grn_id' => $batch->grn_id,
-                'invoice_number' => $batch->supplier_invoice_number, 'date' => $batch->date,
-                'purchase_price' => $batch->purchase_price, 'sale_price' => $batch->sale_price, 'hire_price' => $batch->hire_price,
-                'remain_qty' => $batch->remain_qty, 'available_qty' => $batch->remain_qty + ($quantities[$batch->id] ?? 0),
-                'units' => $units->filter(function ($unit) use ($lineBatches, $batch) {
-                    return ($lineBatches[$unit->grn_product_id] ?? null) == $batch->id;
-                })->values()->toArray(),
+                'id' => $batch->id,
+                'code' => 'B' . str_pad($batch->id, 6, '0', STR_PAD_LEFT),
+                'product_id' => $batch->product_id,
+                'grn_id' => $batch->grn_id,
+                'invoice_number' => $batch->supplier_invoice_number,
+                'date' => $batch->date,
+                'purchase_price' => $batch->purchase_price,
+                'sale_price' => $batch->sale_price,
+                'hire_price' => $batch->hire_price,
+                'remain_qty' => $batch->remain_qty,
+                'available_qty' => $batch->remain_qty + ($quantities[$batch->id] ?? 0),
+                'is_returned' => $isDamagedReturn || $isGoodReturn || $hasReturnStock,
+                'is_damaged_return' => $isDamagedReturn,
+                'return_label' => $returnLabel,
+                'units' => $batchUnits,
+                '_owned_qty' => $quantities[$batch->id] ?? 0,
             ];
         });
+
+        // Group normal batches with identical prices (purchase_price, sale_price, hire_price) into a single FIFO entry;
+        // keep different-priced batches and returned batches (SRN-RET- / SRN-DMG-) separate.
+        return $mapped->groupBy(function ($b) {
+            if ($b['is_returned']) {
+                return 'ret_' . $b['id'];
+            }
+            return number_format((float) $b['purchase_price'], 2, '.', '') . '|' .
+                   number_format((float) $b['sale_price'], 2, '.', '') . '|' .
+                   number_format((float) $b['hire_price'], 2, '.', '');
+        })->map(function ($group) {
+            if ($group->count() === 1) {
+                $first = $group->first();
+                unset($first['_owned_qty']);
+                return $first;
+            }
+
+            // Prefer owned batch on edit, otherwise oldest (FIFO)
+            $primary = $group->first(function ($b) { return $b['_owned_qty'] > 0; }) ?: $group->first();
+            $primary['code'] = 'B' . str_pad($primary['id'], 6, '0', STR_PAD_LEFT) . ' (' . $group->count() . ' batches)';
+            $primary['remain_qty'] = $group->sum('remain_qty');
+            $primary['available_qty'] = $group->sum('available_qty');
+            $primary['is_returned'] = $group->contains('is_returned', true);
+            $primary['return_label'] = $primary['is_returned'] ? 'CONTAINS RETURNED ITEM' : null;
+            $primary['units'] = $group->pluck('units')->flatten(1)->values()->toArray();
+            unset($primary['_owned_qty']);
+            return $primary;
+        })->values();
     }
 }

@@ -316,8 +316,30 @@
             </div>
         </div>
 
-        <input type="hidden" id="lat_coordinats" class="lat_coordinats" name="lat_coordinates" value="{{ $customer->lat_coordinates }}">
-        <input type="hidden" id="lng_coordinats" class="lng_coordinats" name="lng_coordinates" value="{{ $customer->lng_coordinates }}">
+        <div class="col-md-12 mt-2 mb-3">
+            <div class="card border">
+                <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="fas fa-map-marker-alt mr-1 text-primary"></i> {{ __('Customer Location (Map)') }}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="btn_use_my_location_edit">
+                        <i class="fas fa-crosshairs mr-1"></i> {{ __('Use Current Location') }}
+                    </button>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label class="small font-weight-bold mb-1">{{ __('Latitude') }}</label>
+                            <input type="text" id="lat_coordinats" class="form-control lat_coordinats" name="lat_coordinates" value="{{ $customer->lat_coordinates }}" placeholder="e.g. 7.207248">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="small font-weight-bold mb-1">{{ __('Longitude') }}</label>
+                            <input type="text" id="lng_coordinats" class="form-control lng_coordinats" name="lng_coordinates" value="{{ $customer->lng_coordinates }}" placeholder="e.g. 79.843413">
+                        </div>
+                    </div>
+                    <div id="geomap_edit" style="height: 300px; border-radius: 8px; border: 1px solid #CBD5E1;"></div>
+                    <small class="text-muted d-block mt-1">{{ __('Click on the map or drag the pin to update the customer location.') }}</small>
+                </div>
+            </div>
+        </div>
 
 
 
@@ -1078,5 +1100,55 @@
     $(document).on('change', '#customer_photo', function () {
         previewCustomerPhoto(this);
     });
+
+    (function initCustomerEditMap() {
+        function setupLeaflet() {
+            if (typeof L === 'undefined' || !document.getElementById('geomap_edit')) return;
+            var latInput = document.getElementById('lat_coordinats');
+            var lngInput = document.getElementById('lng_coordinats');
+            var initLat = parseFloat(latInput.value) || 7.207248;
+            var initLng = parseFloat(lngInput.value) || 79.843413;
+
+            var map = L.map('geomap_edit').setView([initLat, initLng], latInput.value ? 15 : 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            var marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
+
+            function setCoords(lat, lng) {
+                latInput.value = Number(lat).toFixed(6);
+                lngInput.value = Number(lng).toFixed(6);
+                marker.setLatLng([lat, lng]);
+            }
+
+            marker.on('dragend', function (e) {
+                var pos = e.target.getLatLng();
+                setCoords(pos.lat, pos.lng);
+            });
+
+            map.on('click', function (e) {
+                setCoords(e.latlng.lat, e.latlng.lng);
+            });
+
+            $('#btn_use_my_location_edit').off('click.custMapEdit').on('click.custMapEdit', function () {
+                if (!navigator.geolocation) return;
+                navigator.geolocation.getCurrentPosition(function (pos) {
+                    setCoords(pos.coords.latitude, pos.coords.longitude);
+                    map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                });
+            });
+
+            setTimeout(function () { map.invalidateSize(); }, 300);
+        }
+
+        if (typeof L === 'undefined') {
+            $('<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">').appendTo('head');
+            $.getScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', setupLeaflet);
+        } else {
+            setupLeaflet();
+        }
+    })();
 </script>
 

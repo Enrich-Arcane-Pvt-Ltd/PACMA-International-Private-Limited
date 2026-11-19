@@ -24,7 +24,64 @@ class AuthenticationConfirmationController extends Controller
             $installments = WaittingInstallment::where('status', 1)->where('branch_id', \Auth::user()->branchId())->get();
             $loanInstallments = WaittingLoanInstallment::where('status', 1)->where('branch_id', \Auth::user()->branchId())->get();
             $pawningInstallments = WaittingPawningInstallment::where('status', 1)->where('branch_id', \Auth::user()->branchId())->get();
-            return view('authenticationRequests.index', compact('sales', 'installments', 'loanInstallments', 'pawningInstallments'));
+            $itemReturnsQuery = \App\ItemReturn::with(['invoice', 'product', 'vender', 'chart_of_account', 'retlated_chart_of_account'])->where('status', 2);
+            if (\Auth::user()->branchId() != 0) {
+                $itemReturnsQuery->where('branch_id', \Auth::user()->branchId());
+            }
+            $itemReturns = $itemReturnsQuery->orderBy('id', 'desc')->get();
+            $grnsQuery = \App\Grn::with('vender')->where('approval_status', 'pending');
+            if (\Auth::user()->branchId() != 0) {
+                $grnsQuery->where('branch_id', \Auth::user()->branchId());
+            }
+            $pendingGrns = $grnsQuery->orderBy('id', 'desc')->get();
+
+            // Processed (Approved / Rejected) history
+            $processedItemReturnsQuery = \App\ItemReturn::with(['invoice', 'product', 'vender'])
+                ->whereIn('status', [1, 3]);
+            if (\Auth::user()->branchId() != 0) {
+                $processedItemReturnsQuery->where('branch_id', \Auth::user()->branchId());
+            }
+            $processedItemReturns = $processedItemReturnsQuery->orderBy('id', 'desc')->limit(100)->get();
+
+            $processedGrnsQuery = \App\Grn::with('vender')
+                ->whereIn('approval_status', ['approved', 'rejected']);
+            if (\Auth::user()->branchId() != 0) {
+                $processedGrnsQuery->where('branch_id', \Auth::user()->branchId());
+            }
+            $processedGrns = $processedGrnsQuery->orderBy('id', 'desc')->limit(100)->get();
+
+            $processedSales = WaittingSale::whereIn('status', [0, 2, 3])
+                ->where('branch_id', \Auth::user()->branchId())
+                ->orderBy('id', 'desc')->limit(100)->get();
+
+            $processedInstallments = WaittingInstallment::whereIn('status', [0, 2, 3])
+                ->where('branch_id', \Auth::user()->branchId())
+                ->orderBy('id', 'desc')->limit(100)->get();
+
+            $processedLoanInstallments = WaittingLoanInstallment::whereIn('status', [0, 2, 3])
+                ->where('branch_id', \Auth::user()->branchId())
+                ->orderBy('id', 'desc')->limit(100)->get();
+
+            $processedPawningInstallments = WaittingPawningInstallment::whereIn('status', [0, 2, 3])
+                ->where('branch_id', \Auth::user()->branchId())
+                ->orderBy('id', 'desc')->limit(100)->get();
+
+            $pendingStockAdjustmentsQuery = \App\StockAdjustment::with('inventory.products')->where('status', 2);
+            if (\Auth::user()->branchId() != 0) {
+                $pendingStockAdjustmentsQuery->where('branch_id', \Auth::user()->branchId());
+            }
+            $pendingStockAdjustments = $pendingStockAdjustmentsQuery->orderBy('id', 'desc')->get();
+
+            $processedStockAdjustmentsQuery = \App\StockAdjustment::with('inventory.products')->whereIn('status', [1, 3]);
+            if (\Auth::user()->branchId() != 0) {
+                $processedStockAdjustmentsQuery->where('branch_id', \Auth::user()->branchId());
+            }
+            $processedStockAdjustments = $processedStockAdjustmentsQuery->orderBy('id', 'desc')->limit(100)->get();
+
+            return view('authenticationRequests.index', compact(
+                'sales', 'installments', 'loanInstallments', 'pawningInstallments', 'itemReturns', 'pendingGrns', 'pendingStockAdjustments',
+                'processedItemReturns', 'processedGrns', 'processedSales', 'processedInstallments', 'processedLoanInstallments', 'processedPawningInstallments', 'processedStockAdjustments'
+            ));
         } else {
             return redirect()->back()->with('error', __('Permission denied.'));
         }
@@ -36,7 +93,22 @@ class AuthenticationConfirmationController extends Controller
         $installments = WaittingInstallment::where('status', 1)->where('branch_id', \Auth::user()->branchId())->count();
         $loanInstallments = WaittingLoanInstallment::where('status', 1)->where('branch_id', \Auth::user()->branchId())->count();
         $pawningInstallments = WaittingPawningInstallment::where('status', 1)->where('branch_id', \Auth::user()->branchId())->count();
-        return json_encode($sales + $installments + $loanInstallments + $pawningInstallments);
+        $itemReturnsQuery = \App\ItemReturn::where('status', 2);
+        if (\Auth::user()->branchId() != 0) {
+            $itemReturnsQuery->where('branch_id', \Auth::user()->branchId());
+        }
+        $itemReturns = $itemReturnsQuery->count();
+        $grnsQuery = \App\Grn::where('approval_status', 'pending');
+        if (\Auth::user()->branchId() != 0) {
+            $grnsQuery->where('branch_id', \Auth::user()->branchId());
+        }
+        $pendingGrns = $grnsQuery->count();
+        $stockAdjQuery = \App\StockAdjustment::where('status', 2);
+        if (\Auth::user()->branchId() != 0) {
+            $stockAdjQuery->where('branch_id', \Auth::user()->branchId());
+        }
+        $pendingStockAdjustments = $stockAdjQuery->count();
+        return json_encode($sales + $installments + $loanInstallments + $pawningInstallments + $itemReturns + $pendingGrns + $pendingStockAdjustments);
     }
 
     public function waittingSaleCreate(Request $request)

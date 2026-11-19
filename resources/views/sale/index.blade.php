@@ -155,6 +155,11 @@
                                                                             Paid</span>
                                                                     @elseif ($sale->status == 3)
                                                                         <span class="badge badge-danger">Overdue</span>
+                                                                    @elseif ($sale->status == 4)
+                                                                        <span class="badge badge-dark">Returned</span>
+                                                                    @endif
+                                                                    @if ((int) $sale->status !== 4 && \App\ItemReturn::where('invoice_id', $sale->invoice_id)->where('status', 1)->exists())
+                                                                        <small class="text-danger d-block">Partial Return</small>
                                                                     @endif
                                                                 </td>
                                                                 @if (Gate::check('view sale') || Gate::check('edit sale') || Gate::check('delete sale'))
