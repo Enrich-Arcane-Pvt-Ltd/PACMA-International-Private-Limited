@@ -1,0 +1,18 @@
+name: Laravel
+
+on:
+  push:
+    branches: [main]
+jobs:
+  Make:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: down
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: "198.187.31.243"
+          username: "popohftf"
+          password: "rs9s5bUehUWSyRYu"
+          server-dir: "pacma.enricharcaneusa.com/"
