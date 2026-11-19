@@ -93,12 +93,18 @@
 
                                                                 <td>
                                                                     @if (isset($invoice->sales))
-                                                                        @if ($invoice->sales->sale_type == 0)
-                                                                            <span
-                                                                                class="badge badge-success">{{ __('Cash Sales') }}</span>
+                                                                        @if ((int) $invoice->sales->status === 4)
+                                                                            <span class="badge badge-dark">{{ __('Returned') }}</span>
+                                                                        @elseif ($invoice->sales->sale_type == 0)
+                                                                            <span class="badge badge-success">{{ __('Cash Sales') }}</span>
                                                                         @elseif($invoice->sales->sale_type == 1)
-                                                                            <span
-                                                                                class="badge badge-info">{{ __('Hire Sales') }}</span>
+                                                                            <span class="badge badge-info">{{ __('Hire Sales') }}</span>
+                                                                        @endif
+                                                                        @php
+                                                                            $returnedAmt = \App\ItemReturn::where('invoice_id', $invoice->id)->where('status', 1)->sum('amount');
+                                                                        @endphp
+                                                                        @if ((int) $invoice->sales->status !== 4 && $returnedAmt > 0)
+                                                                            <small class="text-danger d-block">{{ __('Returned') }}: {{ number_format($returnedAmt, 2) }}</small>
                                                                         @endif
                                                                     @endif
                                                                 </td>

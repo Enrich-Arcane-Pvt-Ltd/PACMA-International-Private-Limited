@@ -16,11 +16,17 @@
         }
         body, #app, .main-wrapper, .main-content, .section {
             background: #fff !important;
-            padding: 0 !important;
+            padding: 0 8px !important;
             margin: 0 !important;
+            left: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
             overflow: visible !important;
+            box-sizing: border-box !important;
+        }
+        .section .row {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
         }
         .main-sidebar,
         .main-navbar,
@@ -37,12 +43,15 @@
             display: flex !important;
             align-items: center;
             justify-content: space-between;
+            gap: 12px;
             border-bottom: 2px solid #F97316;
-            padding-bottom: 10px;
+            padding: 4px 0 10px 0;
             margin-bottom: 14px;
         }
         .pacma-print-header img {
-            height: 46px;
+            height: 42px;
+            width: auto;
+            flex-shrink: 0;
             object-fit: contain;
         }
         .pacma-print-header .ph-center {

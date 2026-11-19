@@ -1,3 +1,8 @@
+<style>
+    #commonModal .modal-body {
+        overflow: visible;
+    }
+</style>
 <div class="setting-tab">
     <ul class="nav nav-pills nav-fill" id="myTab3" role="tablist">
         @if(Gate::check('create item return'))
@@ -35,6 +40,16 @@
                                         </div>
                                         {{Form::text('date','',array('class'=>'form-control datepicker','required'=>'required'))}}
                                     </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-6">
+                                <div class="form-group">
+                                    {{ Form::label('adjustment_preset', __('Adjustment Option (Preset)')) }}
+                                    <select class="form-control customer-sel font-style" id="adjustment_preset">
+                                        <option value="">-- Custom / Manual Selection --</option>
+                                        <option value="cash_sale">Cash Sale</option>
+                                        <option value="hire_sale">Hire Sale</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -78,7 +93,7 @@
                                 <div class="form-group">
                                     {{ Form::label('account_id', __('Account Name')) }}
                                     <div class="input-group">
-                                        <select class="form-control customer-sel font-style account_id" name="account_id" id="account_id" id="account_id" required>
+                                        <select class="form-control customer-sel font-style account_id selectpicker" data-live-search="true" title="-- Select Account Name --" name="account_id" id="account_id" required>
                                             <option value="">-- Select Account Name --</option>
                                             @foreach ($accounts as $account)
                                                 <option value="{{ $account->id }}">{{ $account->name }}</option>
@@ -103,7 +118,7 @@
                                 <div class="form-group">
                                     {{ Form::label('related_account_id', __('Related Account Name')) }}
                                     <div class="input-group">
-                                        <select class="form-control customer-sel font-style related_account_id" name="related_account_id" id="related_account_id" required>
+                                        <select class="form-control customer-sel font-style related_account_id selectpicker" data-live-search="true" title="-- Select Account Name --" name="related_account_id" id="related_account_id" required>
                                             <option value="">-- Select Account Name --</option>
                                             @foreach ($accounts as $account)
                                                 <option value="{{ $account->id }}">{{ $account->name }}</option>
@@ -126,18 +141,51 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     {{ Form::label('amount', __('Amount')) }}
                                     {{ Form::number('amount',null, array('class' => 'form-control amount','required'=>'required','step'=>'0.01', 'data-empty-message'=>"Please Enter Amount", 'data-focus'=>"amount")) }}
                                 </div>
                             </div>
-                            <div class="col-md-8">
+                            <div class="col-md-2">
                                 <div class="form-group">
-                                    {{ Form::label('narration', __('Narration')) }}
-                                    {{Form::text('narration',null,array('class'=>'form-control narration'))}}
+                                    {{ Form::label('return_qty', __('Return Qty')) }}
+                                    <input type="number" name="return_qty" id="return_qty" class="form-control" value="1" min="1" required>
                                 </div>
                             </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    {{ Form::label('item_condition', __('Item Condition')) }}
+                                    <select name="item_condition" id="item_condition" class="form-control customer-sel font-style" required>
+                                        <option value="good">Good (Restock)</option>
+                                        <option value="damaged_resell">Damaged - Resell (Lower Price)</option>
+                                        <option value="damaged_scrap">Damaged - Scrap (Remove)</option>
+                                        <option value="account_only">Account Adjustment Only</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ Form::label('narration', __('Narration')) }}
+                                    {{Form::text('narration',null,array('class'=>'form-control narration','required'=>'required'))}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" id="resell_price_row" style="display: none;">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="resell_sale_price">{{ __('New Sale Price (Damaged)') }} <span class="text-danger">*</span></label>
+                                    <input type="number" name="resell_sale_price" id="resell_sale_price" class="form-control" step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="resell_hire_price">{{ __('New Hire Price (Optional)') }}</label>
+                                    <input type="number" name="resell_hire_price" id="resell_hire_price" class="form-control" step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
 
                             {{-- <div class="col-md-12">
                                 <div class="card repeater">
@@ -336,12 +384,12 @@
                         {{ Form::open(['route' => 'item_return.supplier_store', 'method' => 'POST']) }}
                         <div class="row">
                             <div class="col-md-4 form-group">
-                                {{ Form::label('sr_date', __('Date')) }} <span class="text-danger">*</span>
+                                <label for="sr_date">{{ __('Date') }} <span class="text-danger">*</span></label>
                                 <input type="date" name="date" id="sr_date" value="{{ date('Y-m-d') }}" class="form-control" required>
                             </div>
                             <div class="col-md-4 form-group">
-                                {{ Form::label('sr_vender_id', __('Supplier')) }} <span class="text-danger">*</span>
-                                <select name="vender_id" id="sr_vender_id" class="form-control" required>
+                                <label for="sr_vender_id">{{ __('Supplier') }} <span class="text-danger">*</span></label>
+                                <select name="vender_id" id="sr_vender_id" class="form-control customer-sel font-style selectpicker" data-live-search="true" title="-- {{ __('Select Supplier') }} --" required>
                                     <option value="">-- {{ __('Select Supplier') }} --</option>
                                     @foreach ($venders ?? [] as $vender)
                                         <option value="{{ $vender->id }}">{{ $vender->name }}</option>
@@ -349,40 +397,38 @@
                                 </select>
                             </div>
                             <div class="col-md-4 form-group">
-                                {{ Form::label('sr_grn_id', __('GRN (Optional)')) }}
-                                <select name="grn_id" id="sr_grn_id" class="form-control">
-                                    <option value="">-- {{ __('All / Any GRN') }} --</option>
+                                <label for="sr_grn_id">{{ __('GRN') }} <span class="text-danger">*</span></label>
+                                <select name="grn_id" id="sr_grn_id" class="form-control customer-sel font-style selectpicker" data-live-search="true" title="-- {{ __('Select GRN') }} --" required disabled>
+                                    <option value="">-- {{ __('Select GRN') }} --</option>
                                     @foreach ($grns ?? [] as $g)
-                                        <option value="{{ $g->id }}">{{ $g->supplier_invoice_number ?? Auth::user()->grnNumberFormat($g->id) }} ({{ optional($g->vender)->name }})</option>
+                                        <option value="{{ $g->id }}" data-vender="{{ $g->vender_id }}">{{ $g->supplier_invoice_number ?? Auth::user()->grnNumberFormat($g->id) }} ({{ optional($g->vender)->name }})</option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-4 form-group">
-                                {{ Form::label('sr_product_id', __('Product')) }} <span class="text-danger">*</span>
-                                <select name="product_id" id="sr_product_id" class="form-control" required>
+                                <label for="sr_product_id">{{ __('Product') }} <span class="text-danger">*</span></label>
+                                <select name="product_id" id="sr_product_id" class="form-control customer-sel font-style selectpicker" data-live-search="true" title="-- {{ __('Select Product') }} --" required disabled>
                                     <option value="">-- {{ __('Select Product') }} --</option>
-                                    @foreach ($products as $prod)
-                                        <option value="{{ $prod->id }}">{{ $prod->barcode }} - {{ $prod->name }}</option>
-                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-md-2 form-group">
-                                {{ Form::label('sr_quantity', __('Quantity')) }} <span class="text-danger">*</span>
-                                <input type="number" name="quantity" id="sr_quantity" value="1" min="1" class="form-control" required>
+                                <label for="sr_quantity">{{ __('Quantity') }} <span class="text-danger">*</span></label>
+                                <input type="number" name="quantity" id="sr_quantity" value="1" min="1" class="form-control" required disabled>
                             </div>
                             <div class="col-md-3 form-group">
-                                {{ Form::label('sr_serial_no', __('Serial No.')) }}
-                                <input type="text" name="serial_no" id="sr_serial_no" class="form-control" placeholder="{{ __('Serial No.') }}">
+                                <label for="sr_serial_no">{{ __('Serial No.') }}</label>
+                                <input type="text" name="serial_no" id="sr_serial_no" list="sr_serial_suggestions" class="form-control" placeholder="{{ __('Type or select Serial No.') }}" autocomplete="off" disabled>
+                                <datalist id="sr_serial_suggestions"></datalist>
                             </div>
                             <div class="col-md-3 form-group">
-                                {{ Form::label('sr_amount', __('Return Amount')) }} <span class="text-danger">*</span>
-                                <input type="number" name="amount" id="sr_amount" step="0.01" min="0" class="form-control" required placeholder="0.00">
+                                <label for="sr_amount">{{ __('Return Amount') }} <span class="text-danger">*</span></label>
+                                <input type="number" name="amount" id="sr_amount" step="0.01" min="0" class="form-control" required placeholder="0.00" disabled>
                             </div>
                             <div class="col-md-12 form-group">
-                                {{ Form::label('sr_narration', __('Reason / Narration')) }}
+                                <label for="sr_narration">{{ __('Reason / Narration') }}</label>
                                 <input type="text" name="narration" id="sr_narration" class="form-control" placeholder="{{ __('Reason for returning to supplier') }}">
                             </div>
-                            <div class="col-md-12 text-right">
+                            <div class="col-md-12 mt-2 d-flex justify-content-end" style="gap: 8px;">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
                                 <button type="submit" class="btn btn-primary">{{ __('Submit Supplier Return') }}</button>
                             </div>
@@ -457,6 +503,151 @@
         $('#addStock').prop('disabled', true);
     });
 
+    // Supplier Return: Sequential Selection, Cascading Filters & Auto-Fill
+    var srAllGrnOptions = null;
+    function getSrAllGrns() {
+        if (!srAllGrnOptions) {
+            srAllGrnOptions = $('#sr_grn_id option').clone();
+        }
+        return srAllGrnOptions;
+    }
+
+    function resetSrProductAndDetails() {
+        $('#sr_product_id').empty().append('<option value="">-- {{ __("Select Product") }} --</option>').prop('disabled', true).selectpicker('refresh');
+        resetSrDetailsOnly();
+    }
+
+    function resetSrDetailsOnly() {
+        $('#sr_quantity').val(1).removeAttr('max').prop('disabled', true);
+        $('#sr_serial_no').val('').prop('disabled', true);
+        $('#sr_serial_suggestions').empty();
+        $('#sr_amount').val('').prop('disabled', true);
+    }
+
+    function loadSupplierReturnData(fetchSerialsOnly) {
+        var venderId = $('#sr_vender_id').val() || '';
+        var grnId = $('#sr_grn_id').val() || '';
+        var productId = $('#sr_product_id').val() || '';
+
+        $.getJSON("{{ route('item_return.supplier_filter_data') }}", {
+            vender_id: venderId,
+            grn_id: grnId,
+            product_id: productId
+        }).done(function (res) {
+            if (!fetchSerialsOnly) {
+                var prodSelect = $('#sr_product_id');
+                prodSelect.empty().append('<option value="">-- {{ __("Select Product") }} --</option>');
+                (res.products || []).forEach(function (p) {
+                    prodSelect.append(
+                        $('<option>')
+                            .val(p.id)
+                            .text(p.label)
+                            .attr('data-avail', p.avail)
+                            .attr('data-cost', p.cost)
+                    );
+                });
+                prodSelect.prop('disabled', !(res.products && res.products.length > 0)).selectpicker('refresh');
+            }
+
+            var datalist = $('#sr_serial_suggestions').empty();
+            var serials = res.serials || [];
+            serials.forEach(function (sn) {
+                datalist.append($('<option>').attr('value', sn));
+            });
+            if (fetchSerialsOnly && serials.length > 0) {
+                $('#sr_serial_no').val(serials[0]);
+            }
+        });
+    }
+
+    $('body').on('change', '#sr_vender_id', function () {
+        var venderId = $(this).val();
+        var allOpts = getSrAllGrns();
+        var grnSelect = $('#sr_grn_id');
+        grnSelect.empty().append('<option value="">-- {{ __("Select GRN") }} --</option>');
+        if (venderId) {
+            allOpts.each(function () {
+                var opt = $(this);
+                if (opt.val() && String(opt.attr('data-vender')) === String(venderId)) {
+                    grnSelect.append(opt.clone());
+                }
+            });
+            grnSelect.prop('disabled', false);
+        } else {
+            grnSelect.prop('disabled', true);
+        }
+        grnSelect.val('').selectpicker('refresh');
+        resetSrProductAndDetails();
+    });
+
+    $('body').on('change', '#sr_grn_id', function () {
+        var grnId = $(this).val();
+        resetSrProductAndDetails();
+        if (grnId) {
+            loadSupplierReturnData(false);
+        }
+    });
+
+    $('body').on('change', '#sr_product_id', function () {
+        var prodId = $(this).val();
+        if (!prodId) {
+            resetSrDetailsOnly();
+            return;
+        }
+        var selectedOpt = $('option:selected', this);
+        var avail = parseInt(selectedOpt.attr('data-avail') || '0', 10);
+        var cost = parseFloat(selectedOpt.attr('data-cost') || '0');
+        var qtyInput = $('#sr_quantity');
+
+        qtyInput.prop('disabled', false).val(1);
+        $('#sr_serial_no').prop('disabled', false).val('');
+        $('#sr_amount').prop('disabled', false);
+
+        if (avail > 0) {
+            qtyInput.attr('max', avail);
+        } else {
+            qtyInput.removeAttr('max');
+        }
+        $('#sr_amount').val((cost * 1).toFixed(2));
+        loadSupplierReturnData(true);
+    });
+
+    $('body').on('input change', '#sr_quantity', function () {
+        var selectedOpt = $('#sr_product_id option:selected');
+        var cost = parseFloat(selectedOpt.attr('data-cost') || '0');
+        var q = parseInt($(this).val() || '1', 10);
+        if (q > 0) {
+            $('#sr_amount').val((cost * q).toFixed(2));
+        }
+    });
+
+    $('body').on('change', '#item_condition', function(){
+        if ($(this).val() === 'damaged_resell') {
+            $('#resell_price_row').slideDown(150);
+            $('#resell_sale_price').prop('required', true);
+        } else {
+            $('#resell_price_row').slideUp(150);
+            $('#resell_sale_price').prop('required', false).val('');
+            $('#resell_hire_price').val('');
+        }
+    });
+
+    $('body').on('change', '#adjustment_preset', function(){
+        var preset = $(this).val();
+        var presets = {
+            cash_sale: { account: '4', dc: '1', related: '1',  rdc: '0' },
+            hire_sale: { account: '4', dc: '1', related: '12', rdc: '0' }
+        };
+
+        if (presets[preset]) {
+            var p = presets[preset];
+            $('#account_id').selectpicker('val', p.account);
+            $('#debit_credit').val(p.dc);
+            $('#related_account_id').selectpicker('val', p.related);
+            $('#related_debit_credit').val(p.rdc);
+        }
+    });
+
     $('body').on('change', '.debit_credit', function(){
         var statusVlue = $(this).val();
         var relatedStatus = $('.related_debit_credit');
@@ -483,22 +674,42 @@
 
     $('body').on('change', '#invoice_id', function(){
         var invoiceId = $(this).val();
+        $('#inventory_id').val('');
+        $('#serial_no').val('');
+        $('#amount').val('');
         if(invoiceId != ''){
             $.ajax({
                 url:"{{ url('item_return/invoice_search') }}/"+invoiceId,
                 method:'GET',
                 dataType:'json',
                 success: function (data, textStatus, jqXHR){
-                    if(data != null){
+                    if(data != null && data.sales){
                         $('#customer_id').val(data.customer_id);
+                        if (Number(data.sales.sale_type) === 0) {
+                            $('#adjustment_preset').val('cash_sale').trigger('change');
+                        } else if (Number(data.sales.sale_type) === 1) {
+                            $('#adjustment_preset').val('hire_sale').trigger('change');
+                        }
                         $('#product_id').html("");
-                        $('#product_id').append('<option data-inventory="" value = "">-- Select Item --</option>');
+                        $('#product_id').append('<option data-inventory="" data-serial="" data-amount="" value="">-- Select Item --</option>');
 
                             if(data.sales.modal_type == 1){
-                                $('#product_id').append('<option data-inventory="' + data.sales.inventory_id + '" value="' + data.sales.product_id + '">' + data.sales.products.name + '</option>');
+                                var serialNo = (data.sales.hire_purchase_details && data.sales.hire_purchase_details.warranty && data.sales.hire_purchase_details.warranty.serial_number)
+                                    ? data.sales.hire_purchase_details.warranty.serial_number
+                                    : '';
+                                var saleAmount = (data.sales.net_amount !== null && data.sales.net_amount !== undefined)
+                                    ? data.sales.net_amount
+                                    : (data.sales.unit_price || '');
+                                $('#product_id').append('<option data-inventory="' + data.sales.inventory_id + '" data-serial="' + serialNo + '" data-amount="' + saleAmount + '" value="' + data.sales.product_id + '">' + data.sales.products.name + '</option>');
                             } else if(data.sales.modal_type == 2){
                                 for (var i = 0; i < data.sales.sale_items.length; i++) {
-                                    $('#product_id').append('<option data-inventory="' + data.sales.sale_items[i].inventory_id + '" value="' + data.sales.sale_items[i].product_id + '">' + data.sales.sale_items[i].products.name + '</option>');
+                                    var itemSerial = (data.sales.sale_items[i].warranty && data.sales.sale_items[i].warranty.serial_number)
+                                        ? data.sales.sale_items[i].warranty.serial_number
+                                        : '';
+                                    var itemAmount = (data.sales.sale_items[i].net_amount !== null && data.sales.sale_items[i].net_amount !== undefined)
+                                        ? data.sales.sale_items[i].net_amount
+                                        : (data.sales.sale_items[i].unit_price || '');
+                                    $('#product_id').append('<option data-inventory="' + data.sales.sale_items[i].inventory_id + '" data-serial="' + itemSerial + '" data-amount="' + itemAmount + '" value="' + data.sales.sale_items[i].product_id + '">' + data.sales.sale_items[i].products.name + '</option>');
                                 }
                             }
                         $('#product_id').prop('disabled', false);
@@ -506,7 +717,7 @@
                     else{
                         $('#customer_id').val('');
                         $('#product_id').html("");
-                        $('#product_id').append('<option data-inventory="" value = "">Nothing Selected</option>');
+                        $('#product_id').append('<option data-inventory="" data-serial="" data-amount="" value="">Nothing Selected</option>');
                         $('#product_id').prop('disabled', true);
                     }
                 },
@@ -514,6 +725,7 @@
                 }
             });
         } else {
+            $('#adjustment_preset').val('');
             $('#product_id').prop('disabled', true);
             $('#product_id').val("");
             $('#customer_id').val("");
@@ -522,8 +734,13 @@
     });
 
     $('body').on('change', '#product_id', function(){
-        var inventoryId = $('option:selected', this).attr('data-inventory');
+        var selectedOption = $('option:selected', this);
+        var inventoryId = selectedOption.attr('data-inventory') || '';
+        var serialNo = selectedOption.attr('data-serial') || '';
+        var itemAmount = selectedOption.attr('data-amount') || '';
         $('#inventory_id').val(inventoryId);
+        $('#serial_no').val(serialNo);
+        $('#amount').val(itemAmount !== '' ? parseFloat(itemAmount).toFixed(2) : '');
     });
 
 
@@ -661,11 +878,11 @@
             data:{date:date, inventory_id:inventryId, new_qty:newQty, description:description, command:command, "_token": "{{ csrf_token() }}"},
             success: function (data, textStatus, jqXHR){
                 if(data == 'success'){
-                    Swal.fire({
+                        Swal.fire({
                             icon: 'success',
-                            title: 'Success',
-                            text: 'The Stock Adjusted Successfully!',
-                            timer: 1300,
+                            title: 'Submitted',
+                            text: 'Stock Adjustment submitted for Admin approval!',
+                            timer: 1500,
                             showConfirmButton: false
                         });
 

@@ -134,24 +134,22 @@
                         <form method="post" action="{{ route('ele_profit.search') }}">
                             @csrf
                             <div class="card-body">
-                                <div class="row">
-                                    <div class="col">
+                                <div class="row align-items-end">
+                                    <div class="col-12 mb-2">
                                         <h4 class="h4 mb-0">Filter</h4>
                                     </div>
-                                    {{-- <div class="col-md-2">
-                                        </div> --}}
-                                    <div class="col-md-2">
-                                        <label for="start_month">Start Date</label>
+                                    <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                        <label for="start_date">Start Date</label>
                                         <input class="form-control font-style" name="start_date" type="date"
                                             value="{{ $start_date ?? '' }}" id="start_date" required>
                                     </div>
-                                    <div class="col-md-2">
-                                        <label for="end_month">End Date</label>
+                                    <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                        <label for="end_date">End Date</label>
                                         <input class="form-control font-style" name="end_date" type="date"
                                             value="{{ $end_date ?? '' }}" id="end_date" required>
                                     </div>
-                                    <div class="col-md-2">
-                                        <label for="loan_type">Category</label>
+                                    <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                        <label for="category_id">Category</label>
                                         @if (isset($category_id))
                                             @if ($category_id != '')
                                                 <input type="hidden" id="category"
@@ -160,8 +158,8 @@
                                         @endif
                                         {{ Form::select('category_id', $productCategories, $category_id ?? '', ['class' => 'form-control font-style']) }}
                                     </div>
-                                    <div class="col-md-2">
-                                        <label for="loan_type">Sale Type</label>
+                                    <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                        <label for="sale_type">Sale Type</label>
                                         @if (isset($saleType))
                                             @if ($saleType != '')
                                                 <input type="hidden" id="saleType"
@@ -179,13 +177,13 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-md-2">
+                                    <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
                                         <label for="introducer_id">Salesman</label>
                                         {{ Form::select('introducer_id', $introducers, $saleIntroducer ?? '', ['id' => 'introducer_id', 'class' => 'form-control font-style']) }}
                                     </div>
 
-                                    <div class="col-auto apply-btn">
-                                        <input class="btn font-style btn-outline-primary" type="submit" value="Search">
+                                    <div class="col-lg-2 col-md-4 col-sm-6 mb-2 d-flex justify-content-end">
+                                        <input class="btn font-style btn-primary w-100" type="submit" value="Search">
                                     </div>
                                 </div>
                             </div>

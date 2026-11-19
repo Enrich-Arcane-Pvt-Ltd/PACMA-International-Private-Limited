@@ -303,7 +303,7 @@
 
         <div class="form-group col-md-3">
             <label for="introducer_id">{{ __('Salesman') }} <span class="text-danger">*</span></label>
-            <select class="form-control font-style" name="introducer_id" id="introducer_id"
+            <select class="form-control customer-sel font-style selectpicker" data-live-search="true" name="introducer_id" id="introducer_id"
                 data-empty-message="Please Select Salesman" data-focus="introducer_id" required>
                 <option value="">Select Salesman</option>
                 @foreach ($users as $user)

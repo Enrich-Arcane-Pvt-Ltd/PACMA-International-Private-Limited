@@ -49,7 +49,8 @@
                         var availInThis = Math.max(0, Number(b.available_qty || 0) - takenFromThis);
                         var effectiveAvail = Math.min(availInThis, netTotal);
 
-                        var optText = b.code + ' | Invoice ' + (b.invoice_number || '-') + ' | ' + b.date +
+                        var returnPrefix = b.return_label ? '[' + b.return_label + '] ' : '';
+                        var optText = returnPrefix + b.code + ' | Invoice ' + (b.invoice_number || '-') + ' | ' + b.date +
                             ' | Cost ' + money(b.purchase_price) + ' | Cash ' + money(b.sale_price) +
                             (b.hire_price ? ' | Retail ' + money(b.hire_price) : '') +
                             ' | Available ' + effectiveAvail + (effectiveAvail <= 0 ? ' (Out of stock)' : '');
@@ -114,11 +115,27 @@
                 var group = scope.find('.sale-batch-group');
                 if (!group.length) {
                     group = $('<div class="sale-batch-group mt-2 d-none">');
-                    $('<label class="d-block small mb-1">').text('Stock Batch *').appendTo(group);
+                    $('<label class="sale-batch-label d-block small font-weight-bold mb-1">').text('Stock Batch *').appendTo(group);
                     var select = $('<select class="form-control sale-batch-select">').appendTo(group);
                     select.attr('name', (product.attr('name') || 'product').replace('product', 'batch_id'));
-                    $('<a class="sale-batch-view d-none small" target="_blank" rel="noopener">').text('View Batch').appendTo(group);
+                    var meta = $('<div class="sale-batch-meta d-flex flex-wrap align-items-center justify-content-between mt-2" style="gap: 8px;">').appendTo(group);
+                    $('<span class="sale-batch-return-badge d-none">').appendTo(meta);
+                    $('<a class="sale-batch-view sale-batch-view-btn d-none" target="_blank" rel="noopener">')
+                        .html('<i class="fas fa-external-link-alt mr-1"></i>View Batch')
+                        .appendTo(meta);
                     group.insertAfter(config.cash ? (product.closest('.bootstrap-select').length ? product.closest('.bootstrap-select') : product) : product.closest('.input-group'));
+                }
+                function updateReturnBadge(batch) {
+                    var badge = group.find('.sale-batch-return-badge');
+                    if (batch && batch.is_returned) {
+                        var icon = batch.is_damaged_return ? 'fa-exclamation-triangle' : 'fa-undo-alt';
+                        var label = batch.is_damaged_return ? 'Returned Item (Damaged / Reduced Price)' : 'Contains Returned Item';
+                        badge.html('<i class="fas ' + icon + ' mr-1"></i>' + label)
+                            .removeClass('d-none is-damaged is-restocked')
+                            .addClass(batch.is_damaged_return ? 'is-damaged' : 'is-restocked');
+                    } else {
+                        badge.addClass('d-none').removeClass('is-damaged is-restocked').empty();
+                    }
                 }
                 var batchSelect = group.find('select');
                 group.addClass('d-none');
@@ -139,7 +156,7 @@
                     return;
                 }
 
-                $.getJSON(config.url + '/' + product.val(), {sale_id: config.saleId || ''}).done(function (response) {
+                $.getJSON(config.url + '/' + product.val(), { sale_id: config.saleId || '' }).done(function (response) {
                     if (scope.data('batch-generation') !== generation) return;
                     var batches = response.batches || [];
                     var total = batches.reduce(function (sum, batch) { return sum + Number(batch.available_qty || 0); }, 0);
@@ -190,7 +207,7 @@
                             syncBatchOptions(scope, batch ? batch.id : '');
                             var curAvail = parseFloat(scope.find('.available_quantity, #available_quantity').val());
                             if (isNaN(curAvail)) curAvail = batch ? batch.available_qty : total;
-                            quantity.attr({min: 1, max: curAvail});
+                            quantity.attr({ min: 1, max: curAvail });
                             if (!quantity.val() || Number(quantity.val()) > curAvail) {
                                 quantity.val(curAvail > 0 ? 1 : 0);
                             }
@@ -228,7 +245,7 @@
                         SaleWarranty.bind(scope, []);
                         if (!batch) return;
                         var units = (batch.units || []).map(function (unit) {
-                            var result = Object.assign({}, unit, {inventory_id: batch.id, batch_available_qty: batch.available_qty});
+                            var result = Object.assign({}, unit, { inventory_id: batch.id, batch_available_qty: batch.available_qty });
                             if (restore && saved && Number(saved.warrantyId) === Number(unit.id)) {
                                 ['warranty_period', 'additional_warranty_description', 'warranty_document'].forEach(function (field) {
                                     if (saved.snapshot && Object.prototype.hasOwnProperty.call(saved.snapshot, field)) result[field] = saved.snapshot[field];
@@ -290,6 +307,7 @@
                             inventory.val(batch.id);
                             if (batchIdHidden.length) batchIdHidden.val(batch.id);
                             if (config.canViewBatch) group.find('a').attr('href', '/stock/batch/' + batch.id).removeClass('d-none');
+                            updateReturnBadge(batch);
                             syncBatchOptions(scope, batch.id);
                             applyPrices(batch, restore);
                             bindBatchWarranty(batch, restore);
@@ -298,6 +316,7 @@
                             // No batch selected: display the TOTAL available stock across all batches
                             inventory.val('');
                             if (batchIdHidden.length) batchIdHidden.val('');
+                            updateReturnBadge(null);
                             syncBatchOptions(scope, '');
                             SaleWarranty.bind(scope, []);
                             if (!restore) {
@@ -310,6 +329,7 @@
                     batchSelect.off('change.saleBatch').on('change.saleBatch', function () { choose(false); });
 
                     if (saved) {
+                        group.find('.sale-batch-label, .sale-batch-select').toggleClass('d-none', !hasMultipleBatches);
                         syncBatchOptions(scope, saved.inventory_id);
                         if (hasMultipleBatches) {
                             batchSelect.val(saved.inventory_id);
@@ -318,6 +338,7 @@
                     } else if (hasMultipleBatches) {
                         // For products with multiple batches: initially do NOT select any batch.
                         // Show the total stock in Available Quantity, and require the user to pick a batch.
+                        group.find('.sale-batch-label, .sale-batch-select').removeClass('d-none');
                         batchSelect.val('');
                         inventory.val('');
                         if (batchIdHidden.length) batchIdHidden.val('');
@@ -326,12 +347,16 @@
                         syncAllRows();
                     } else if (batches.length === 1) {
                         // Product has only 1 batch (no batch choice needed):
-                        // Hide batch UI, set hidden inventory_id, and display the full available stock.
+                        // Hide batch select UI, set hidden inventory_id, and display return badge / View Batch if applicable.
                         var soleBatch = batches[0];
+                        group.find('.sale-batch-label, .sale-batch-select').addClass('d-none');
                         batchSelect.empty().append($('<option>').val(soleBatch.id).text(soleBatch.code));
                         batchSelect.val(soleBatch.id);
                         inventory.val(soleBatch.id);
                         if (batchIdHidden.length) batchIdHidden.val(soleBatch.id);
+                        updateReturnBadge(soleBatch);
+                        if (config.canViewBatch) group.find('a').attr('href', '/stock/batch/' + soleBatch.id).removeClass('d-none');
+                        if (soleBatch.is_returned) group.removeClass('d-none');
                         syncBatchOptions(scope, soleBatch.id);
                         applyPrices(soleBatch, false);
                         bindBatchWarranty(soleBatch, false);
@@ -367,9 +392,9 @@
 
             if (config.cash) {
                 $('body').off('input.saleBatchSync', '.quantity')
-                         .on('input.saleBatchSync', '.quantity', function () {
-                             syncAllRows();
-                         });
+                    .on('input.saleBatchSync', '.quantity', function () {
+                        syncAllRows();
+                    });
             }
 
             $(selector).each(function () {
@@ -378,7 +403,7 @@
                 var id = scope.find('.inventory_id, #inventory_id').val();
                 var itemId = scope.find('.sale_item_id').val();
                 var saved = config.rows.find(function (row) { return config.cash ? String(row.id) === String(itemId) : true; });
-                load(product, saved ? {inventory_id: id || saved.inventory_id, warrantyId: config.cash ? saved.product_warranty_id : config.warrantyId, snapshot: config.cash ? saved : config.snapshot} : null);
+                load(product, saved ? { inventory_id: id || saved.inventory_id, warrantyId: config.cash ? saved.product_warranty_id : config.warrantyId, snapshot: config.cash ? saved : config.snapshot } : null);
             });
         }
     };

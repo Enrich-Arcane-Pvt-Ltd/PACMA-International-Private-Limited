@@ -29,15 +29,7 @@
         </div>
     </div>
     @include('partials.admin.footer')
-    @auth('web')
-        <script src="{{ asset('assets/js/idle-timeout.js') }}"
-            data-key="{{ session('idle_tab_key') }}"
-            data-last="{{ session('idle_last_activity') * 1000 }}"
-            data-now="{{ microtime(true) * 1000 }}"
-            data-status="{{ route('session.status') }}"
-            data-activity="{{ route('session.activity') }}"
-            data-login="{{ route('login') }}"></script>
-    @endauth
+    {{-- 5-minute idle timeout disabled --}}
 
 </body>
 

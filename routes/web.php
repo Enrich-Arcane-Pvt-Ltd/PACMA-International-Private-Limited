@@ -1720,6 +1720,8 @@ Route::group(
         Route::get('general_journal/inventory_search/{id}', 'PrimeEntryBookController@inventoryProducts');
         Route::get('general_journal_detail/get_inventory_details/{id}/{purchasePrice}/{salePrice}', 'PrimeEntryBookController@getInventoryDetail');
         Route::post('general_journal/adjust_stock', 'PrimeEntryBookController@adjustStock');
+        Route::post('stock_adjustment/approve/{id}', 'PrimeEntryBookController@approveStockAdjustment')->name('stock_adjustment.approve');
+        Route::post('stock_adjustment/reject/{id}', 'PrimeEntryBookController@rejectStockAdjustment')->name('stock_adjustment.reject');
 
         //ledger accounts
         Route::get('ledger-account/index', 'AccountSummaryController@ledgerAccountIndex')->name('ledger_account.index');
@@ -1814,6 +1816,7 @@ Route::group(
         ],
     ],
     function () {
+        Route::get('item_return/supplier-filter-data', 'ItemReturnController@supplierFilterData')->name('item_return.supplier_filter_data');
         Route::resource('item_return', 'ItemReturnController');
         Route::get('item_return/create', 'ItemReturnController@create')->name('item_return.create');
         Route::get('item_return/invoice_search/{id}', 'ItemReturnController@invoiceSearch')->name('item_return.invoice_search');
@@ -1825,6 +1828,8 @@ Route::group(
         Route::post('item_return/search', 'ItemReturnController@search')->name('item_return.search');
         Route::post('item_return/create_item_for_item', 'ItemReturnController@createItemForItem')->name('item_return.create_item_for_item');
         Route::post('item_return/store_item_for_item', 'ItemReturnController@storeItemForItem')->name('item_return.store_item_for_item');
+        Route::post('item_return/approve/{id}', 'ItemReturnController@approve')->name('item_return.approve');
+        Route::post('item_return/reject/{id}', 'ItemReturnController@reject')->name('item_return.reject');
     }
 );
 
