@@ -85,7 +85,7 @@
                                                             {{-- <th>{{ __('Description') }}</th> --}}
                                                             <th>{{ __('Category') }}</th>
                                                             <th>{{ __('Sub Category') }}</th>
-                                                            <th>{{ __('Brand') }}</th>
+                                                            <th>{{ __('Model') }}</th>
                                                             <th>{{ __('Status') }}</th>
                                                         </tr>
                                                     </thead>

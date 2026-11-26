@@ -1000,8 +1000,9 @@
             });
         }
     });
-    $('body').on('click', '#add_row', function(e) {
+    $('body').off('click.cashSaleAddRowEdit', '#add_row').on('click.cashSaleAddRowEdit', '#add_row', function(e) {
         e.preventDefault();
+        e.stopPropagation();
 
         var canAdd = true;
         var errorMsg = '';

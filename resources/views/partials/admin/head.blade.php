@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/custom_icon.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/app-messages.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/pacma-modern.css?v=26') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/pacma-modern.css?v=29') }}">
 
     <link rel="stylesheet" href="{{ asset('assets/modules/selectpicker/bootstrap-select.min.css') }}">
 

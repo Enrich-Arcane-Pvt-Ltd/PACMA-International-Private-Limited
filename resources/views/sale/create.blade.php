@@ -1314,28 +1314,36 @@ $(document).ready(function() {
     function finalCalculation() {
 
         // outstanding();
-        var hirePrice = $('#gross_hire_price').val();
         var quantity = $('#quantity').val();
         var unitPrice = $('#unit_price').val();
-        var downPayment = $('#down_payment').val();
-        var outStanding = $('#outstanding_amount').val();
-        var totDue = Math.max(0, Math.round(parseFloat(hirePrice) - parseFloat(downPayment)));
-        $('#total_due_amount').val(totDue.toFixed(2));
-
-
-        // var interestRate = parseFloat($('#interest_rate').val()) / 100;
-        var timePeriod = $('#installment').val();
+        var downPayment = parseFloat($('#down_payment').val()) || 0;
+        var outStanding = Math.max(0, parseFloat($('#outstanding_amount').val()) || 0);
+        var timePeriod = parseFloat($('#installment').val()) || 0;
         var dateofSale = $('#date_of_sale').val();
 
-        var interestAmount = Math.max(0, Math.round(parseFloat(totDue) - parseFloat(outStanding)));
+        var rate = parseFloat($('#interest_rate').val());
+        if (isNaN(rate) || rate < 0) {
+            rate = parseFloat($('#interest_rate_fixed').val());
+        }
+        if (isNaN(rate) || rate <= 0) {
+            rate = 2;
+        }
+        $('#interest_rate').val(rate.toFixed(2));
+
+        var interestAmount = (outStanding > 0 && timePeriod > 0)
+            ? Math.max(0, Math.round(outStanding * (rate / 100) * timePeriod))
+            : 0;
         $('#interest_amount').val(interestAmount.toFixed(2));
 
-        var interestRate = (parseFloat(unitPrice) > 0 && parseFloat(timePeriod) > 0)
-            ? Math.max(0, (parseFloat(interestAmount) * 100) / (parseFloat(unitPrice) * parseFloat(timePeriod)))
-            : 0;
-        $('#interest_rate').val(parseFloat(interestRate));
+        var totDue = Math.max(0, Math.round(outStanding + interestAmount));
+        $('#total_due_amount').val(totDue.toFixed(2));
 
-        var monthlyInstallment = Math.round(totDue / parseFloat(timePeriod));
+        if (document.activeElement !== document.getElementById('gross_hire_price')) {
+            var grossHirePrice = Math.max(0, Math.round(downPayment + totDue));
+            $('#gross_hire_price').val(grossHirePrice.toFixed(2));
+        }
+
+        var monthlyInstallment = (timePeriod > 0) ? Math.round(totDue / timePeriod) : 0;
         $('#monthly_installment').val(monthlyInstallment.toFixed(2));
 
         var currentDate = $('#date_of_sale').val();

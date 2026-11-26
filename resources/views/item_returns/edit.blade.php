@@ -77,8 +77,8 @@
             <div class="input-group">
                 <select class="form-control customer-sel font-style debit_credit" name="debit_credit" id="debit_credit" required>
                     <option value="">--Select Status--</option>
-                    <option @if($itemReturn->related_debit_credit == 0) selected @endif value="0">Credit</option>
-                    <option @if($itemReturn->related_debit_credit == 1) selected @endif value="1">Debit</option>
+                    <option @if($itemReturn->debit_credit == 0) selected @endif value="0">Credit</option>
+                    <option @if($itemReturn->debit_credit == 1) selected @endif value="1">Debit</option>
                 </select>
             </div>
         </div>

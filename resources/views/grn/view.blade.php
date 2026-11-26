@@ -134,7 +134,8 @@
                                     <thead>
                                         <tr>
                                             <th width="9%">{{ __('Product Code') }}</th>
-                                            <th width="18%">{{ __('Product description') }}</th>
+                                            <th width="16%">{{ __('Item Name') }}</th>
+                                            <th width="10%">{{ __('Model') }}</th>
                                             <th width="6%">{{ __('Quantity') }}</th>
                                             <th width="6%">{{ __('Received Quantity') }}</th>
                                             <th>{{ __('Serial & Warranty / Color') }}</th>
@@ -144,7 +145,7 @@
                                                 ({{ $currencySymbol }})</th>
                                             <th width="12%" class="text-right">{{ __('Cash Price') }}
                                                 ({{ $currencySymbol }})</th>
-                                            <th width="12%" class="text-right">{{ __('Retail Price') }}
+                                            <th width="12%" class="text-right">{{ __('Selling Price') }}
                                                 ({{ $currencySymbol }})</th>
                                             <th width="12%" class="text-right">{{ __('Amount') }}
                                                 ({{ $currencySymbol }})</th>
@@ -163,6 +164,7 @@
                                                 {{-- <td>{{ $key + 1 }}</td> --}}
                                                 <td>{{ $product->products['barcode'] }}</td>
                                                 <td>{{ $product->products['name'] }}</td>
+                                                <td>{{ optional(optional($product->products)->brands)->name ?? 'N/A' }}</td>
                                                 <td class="text-center">{{ $product->quantity }}</td>
                                                 <td class="text-center">{{ $product->received_qty }}</td>
                                                 <td>
@@ -199,7 +201,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="5"></td>
+                                            <td colspan="6"></td>
                                             <td colspan="4" class="text-right"><b>{{ __('Sub Total') }}</b></td>
                                             <td class="text-right">
                                                 {{ number_format($totalAmount ?? 0, 2) }}
@@ -207,7 +209,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td colspan="5"></td>
+                                            <td colspan="6"></td>
                                             <td colspan="4" class="text-right"><b>{{ __('Total') }}</b></td>
                                             <td class="text-right">
                                                 {{ number_format($totalAmount ?? 0, 2) }}

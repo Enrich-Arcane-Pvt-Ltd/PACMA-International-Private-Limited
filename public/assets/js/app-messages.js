@@ -21,8 +21,18 @@
         library.appMessageTheme = true;
     }
     function show(type, message, title) {
-        if (!library) { nativeAlert(String(message)); return Promise.resolve({isConfirmed: true}); }
-        return library.fire({icon: type, title: title || ({warning: 'Warning', error: 'Error', success: 'Success', info: 'Information'}[type]), text: String(message)});
+        var msg = String(message == null ? '' : message);
+        if (!library) { nativeAlert(msg.replace(/<[^>]+>/g, ' ').trim()); return Promise.resolve({isConfirmed: true}); }
+        var opts = {
+            icon: type,
+            title: title || ({warning: 'Warning', error: 'Error', success: 'Success', info: 'Information'}[type])
+        };
+        if (/<[a-z][\s\S]*>/i.test(msg)) {
+            opts.html = msg;
+        } else {
+            opts.text = msg;
+        }
+        return library.fire(opts);
     }
     window.AppMessages = {
         show: show,

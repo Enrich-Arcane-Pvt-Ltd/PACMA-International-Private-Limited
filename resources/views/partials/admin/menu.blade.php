@@ -951,7 +951,7 @@
                                     @can('manage product')
                                         <li class="{{ Request::segment(1) == 'product-brand' ? 'active' : '' }}">
                                             <a class="nav-link"
-                                                href="{{ route('product-brand.index') }}">{{ __('Brands') }}</a>
+                                                href="{{ route('product-brand.index') }}">{{ __('Models') }}</a>
                                         </li>
                                     @endcan
                                     @can('manage product')

@@ -1,6 +1,22 @@
 /* PACMA International Private Limited - Modern UI Theme */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
+.grn-items-table th {
+    white-space: nowrap !important;
+    padding: 12px 14px !important;
+    vertical-align: middle !important;
+    font-size: 12px !important;
+}
+
+.grn-items-table td {
+    padding: 10px 10px !important;
+    vertical-align: middle !important;
+}
+
+.grn-items-table td .form-group {
+    margin-bottom: 0 !important;
+}
+
 :root {
     --base-color: #F97316;
     --pacma-orange: #F97316;
@@ -93,8 +109,8 @@ body {
     justify-content: center;
     background: transparent !important;
     border-radius: 0 !important;
-    margin: 10px 14px 8px !important;
-    padding: 12px 10px 14px !important;
+    margin: 8px 10px 8px !important;
+    padding: 10px 8px 12px !important;
     box-shadow: none !important;
     border-bottom: 1px solid #E2E8F0 !important;
     line-height: normal !important;
@@ -108,10 +124,12 @@ body {
 }
 
 .main-sidebar .sidebar-brand a img {
-    height: 62px !important;
-    max-height: 68px;
-    max-width: 185px;
+    height: 85px !important;
+    max-height: 95px;
+    max-width: 100%;
     width: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
     display: block !important;
     object-fit: contain;
 }
@@ -119,10 +137,10 @@ body {
 .main-sidebar .sidebar-brand-sm,
 .main-sidebar .sidebar-brand.sidebar-brand-sm {
     display: none !important;
-    margin: 10px auto !important;
-    padding: 8px !important;
-    width: 48px !important;
-    height: 48px !important;
+    margin: 4px auto 8px !important;
+    padding: 4px !important;
+    width: 100% !important;
+    height: 52px !important;
     border-bottom: 1px solid #E2E8F0 !important;
 }
 
@@ -132,13 +150,25 @@ body.sidebar-mini .main-sidebar .sidebar-brand:not(.sidebar-brand-sm) {
 
 body.sidebar-mini .main-sidebar .sidebar-brand.sidebar-brand-sm {
     display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+body.sidebar-mini .main-sidebar .sidebar-brand-sm a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
 }
 
 body.sidebar-mini .main-sidebar .sidebar-brand-sm a img {
-    height: 32px !important;
-    width: 32px !important;
-    max-height: 34px !important;
-    max-width: 34px !important;
+    height: 40px !important;
+    width: 40px !important;
+    max-height: 42px !important;
+    max-width: 42px !important;
+    padding: 0 !important;
+    margin: 0 !important;
     display: block !important;
     object-fit: contain;
 }
@@ -219,9 +249,14 @@ body.sidebar-mini .main-sidebar .sidebar-brand-sm a img {
 }
 
 /* Fix Collapsed Sidebar (sidebar-mini) Flyout Menu Cutting Off */
-body.sidebar-mini .main-sidebar,
+body.sidebar-mini .main-sidebar {
+    overflow: visible !important;
+}
+
 body.sidebar-mini .main-sidebar #sidebar-wrapper.bg-main_1 {
     overflow: visible !important;
+    margin: 8px 6px !important;
+    padding: 4px !important;
 }
 
 body.sidebar-mini .main-sidebar .sidebar-menu > li > a {
@@ -695,6 +730,22 @@ label,
     min-height: 40px !important;
     display: flex;
     align-items: center;
+}
+
+.select2-container--default .select2-results > .select2-results__options {
+    overflow-x: hidden !important;
+}
+
+.select2-container--default .select2-results__option {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    line-height: 1.4 !important;
+}
+
+.select2-dropdown {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
 }
 
 .select2-container--default .select2-results__option--highlighted[aria-selected],

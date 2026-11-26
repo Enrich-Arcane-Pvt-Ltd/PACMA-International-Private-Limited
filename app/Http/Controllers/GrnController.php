@@ -77,7 +77,7 @@ class GrnController extends Controller
         if (\Auth::user()->can('edit grn')) {
             $grn_number = \Auth::user()->grnNumberFormat($id);
             $grns = Grn::with([
-                'GrnProducts.products',
+                'GrnProducts.products.brands',
             ])->where('branch_id', \Auth::user()->branchId())->find($id);
 
             if (!$grns) {
@@ -469,7 +469,7 @@ class GrnController extends Controller
             $product_services = Product::orderBy('name')->pluck('barcode', 'id');
 
             // Fetch the purchase order along with its related purchase products and their products
-            $purchorders = PurchaseOrder::with('purchaseProducts', 'purchaseProducts.products', 'purchaseProducts.products.productCategory', 'purchaseProducts.products.categoryDetails')->find($id);
+            $purchorders = PurchaseOrder::with('purchaseProducts', 'purchaseProducts.products', 'purchaseProducts.products.brands', 'purchaseProducts.products.productCategory', 'purchaseProducts.products.categoryDetails')->find($id);
             if (!$purchorders) {
                 return redirect()->route('purchase-orders.create-grn')->with('error', 'Purchase order not found.');
             }
@@ -491,7 +491,7 @@ class GrnController extends Controller
                 // Format prices with two decimal places
                 $purchaseProduct->last_purchase_price = number_format($lastPurchase->last_purchase_price ?? 0, 2, '.', '');
                 $cashPrice = floatval($lastPurchase->last_sale_price ?? ($purchaseProduct->products->sale_price ?? 0));
-                $hirePrice = $cashPrice > 0 ? round($cashPrice * 1.38) : round(floatval($lastPurchase->last_hire_price ?? 0));
+                $hirePrice = round(floatval($lastPurchase->last_hire_price ?? ($purchaseProduct->products->hire_price ?? 0)));
                 $purchaseProduct->sale_price = number_format($cashPrice, 2, '.', '');
                 $purchaseProduct->hire_price = number_format($hirePrice, 2, '.', '');
 
@@ -502,6 +502,7 @@ class GrnController extends Controller
                 $catName = ($purchaseProduct->products && $purchaseProduct->products->productCategory) ? $purchaseProduct->products->productCategory->name : (($purchaseProduct->products && $purchaseProduct->products->categoryDetails) ? $purchaseProduct->products->categoryDetails->name : '');
                 $purchaseProduct->is_furniture = preg_match('/furniture/i', $catName) ? 1 : 0;
                 $purchaseProduct->product_name = $purchaseProduct->products ? $purchaseProduct->products->name : '';
+                $purchaseProduct->product_model = ($purchaseProduct->products && $purchaseProduct->products->brands) ? $purchaseProduct->products->brands->name : '';
             });
             $currencySymbol = $this->currencySymbol;
             // Return the GRN creation view with the required data

@@ -85,8 +85,10 @@
         @php
             $custName = optional($customer)->full_name ?: (optional($customer)->name ?? '');
             $custAge = !empty(optional($customer)->dob) ? \Carbon\Carbon::parse($customer->dob)->age : '';
-            $permAddr = optional($customer)->address_nic ?: (optional($customer)->address ?? '');
-            $currAddr = optional($customer)->address ?? '';
+            $houseNo = trim((string)(optional($customer)->house_no ?? ''));
+            $streetAddr = trim((string)(optional($customer)->address ?? ''));
+            $currAddr = trim(($houseNo !== '' ? $houseNo . ' ' : '') . $streetAddr);
+            $permAddr = trim((string)(optional($customer)->address_nic ?? '')) ?: $currAddr;
             $appNo = optional($invoice)->invoice_code
                 ?? ($sale->sale_id ?? ($customer ? 'CUST-' . str_pad($customer->customer_id, 5, '0', STR_PAD_LEFT) : '........................................'));
             $appDate = $sale->date_of_sale ?? ($invoice->issue_date ?? ($customer && $customer->created_at ? $customer->created_at->format('Y-m-d') : '........................................'));

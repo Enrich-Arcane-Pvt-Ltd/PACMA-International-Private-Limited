@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 @section('page-title')
-{{__('Product Brands')}}
+{{__('Product Models')}}
 @endsection
 @section('content')
 <style>
@@ -31,11 +31,11 @@
             <div class="col-12">
                 <div class="bg-white cus_show p-2 br-4 mb-2">
                     <div class="d-flex justify-content-between align-content-center align-items-center px-3">
-                        <h4 class="mt-2">{{__('Product Brands')}}</h3>
+                        <h4 class="mt-2">{{__('Product Models')}}</h3>
                             <div class="section-header-breadcrumb d-flex ">
                                 <div class="breadcrumb-item active"><a
                                         href="{{route('dashboard')}}">{{__('Dashboard')}}</a></div>
-                                <div class="breadcrumb-item">{{__('Product Brands')}}</div>
+                                <div class="breadcrumb-item">{{__('Product Models')}}</div>
                             </div>
                     </div>
                 </div>
@@ -45,11 +45,11 @@
                 <div class="card br-4 cus_show">
                     <div class="card-header">
                         <div class="d-flex justify-content-between w-100">
-                            <h4>{{__('Manage Product Brands')}}</h4>
+                            <h4>{{__('Manage Product Models')}}</h4>
                             @can('create product')
                             <div class="col-auto">
                                 <a href="#" data-size="xl" data-url="{{ route('product-brand.create') }}"
-                                    data-ajax-popup="true" data-title="{{__('Create New Product Brand')}}"
+                                    data-ajax-popup="true" data-title="{{__('Create New Product Model')}}"
                                     class="btn btn-icon icon-left btn-primary">
                                     <span class="btn-inner--icon"><i class="fas fa-plus"></i></span>
                                     <span class="btn-inner--text"> {{__('Create')}}</span>
@@ -68,7 +68,7 @@
                                             <table class="table table-flush" id="product_brands_table">
                                                 <thead class="thead-light">
                                                     <tr>
-                                                        <th> {{__('Brand #')}}</th>
+                                                        <th> {{__('Model #')}}</th>
                                                         <th> {{__('Name')}}</th>
                                                         @if(Gate::check('edit product') || Gate::check('block product'))
                                                         <th class="text-center"> {{__('Action')}}</th>
@@ -92,7 +92,7 @@
                                                                 data-size="xl"
                                                                 data-url="{{ route('product-brand.edit',$productBrand->id) }}"
                                                                 data-ajax-popup="true"
-                                                                data-title="{{__('Edit Product Brand')}}"
+                                                                data-title="{{__('Edit Product Model')}}"
                                                                 data-toggle="tooltip"
                                                                 data-original-title="{{__('Edit')}}">
                                                                 <i class="fas fa-pencil-alt"></i>
@@ -162,8 +162,8 @@
         event.preventDefault();
         var form = $(this).parents('form');
         Swal.fire({
-            title: 'Are you sure you want to block this brand ?',
-            text: "Blocking this brand will not allow it to use in this company.",
+            title: 'Are you sure you want to block this model ?',
+            text: "Blocking this model will not allow it to use in this company.",
             type: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#6777ef',
@@ -183,8 +183,8 @@
         event.preventDefault();
         var form = $(this).parents('form');
         Swal.fire({
-            title: 'Are you sure you want to unblock this brand ?',
-            text: "Unblocking this brand will allow it to use in this company.",
+            title: 'Are you sure you want to unblock this model ?',
+            text: "Unblocking this model will allow it to use in this company.",
             type: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#6777ef',

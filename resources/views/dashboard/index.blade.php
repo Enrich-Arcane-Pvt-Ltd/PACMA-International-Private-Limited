@@ -391,7 +391,7 @@
                                     <i class="fas fa-arrow-right pacma-arrow"></i>
                                 </a>
 
-                                <a href="{{ route('cash_collector_report.index') }}" class="pacma-report-item">
+                                <a href="{{ route('collection_report.index') }}" class="pacma-report-item">
                                     <div class="d-flex align-items-center">
                                         <div class="pacma-report-icon"><i class="fas fa-coins"></i></div>
                                         <span>Collection Report</span>

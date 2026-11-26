@@ -67,7 +67,7 @@
                                                         <tr role="row">
                                                             <th>{{ __('Product Code') }}</th>
                                                             <th>{{ __('Sub Category') }}</th>
-                                                            <th class="text-right">{{ __('Retail Price') }}
+                                                            <th class="text-right">{{ __('Selling Price') }}
                                                                 ({{ $currencySymbol }})</th>
                                                             <th class="text-right">{{ __('Discount') }}
                                                                 ({{ $currencySymbol }})</th>

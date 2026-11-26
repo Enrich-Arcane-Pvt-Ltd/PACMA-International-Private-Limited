@@ -523,11 +523,16 @@ class ItemReturnController extends Controller
                             $inv->save();
                         }
                         StockTransaction::where('product_id', $item->product_id)
-                            ->where('stock_master_id', 1)
+                            ->whereIn('stock_master_id', [1, 5])
                             ->where('date', $item->date)
                             ->where('quantity', '<', 0)
                             ->where('status', 1)
                             ->update(['status' => 0]);
+                        if (!empty($item->serial_no)) {
+                            \App\ProductWarrantySerial::where('serial_number', $item->serial_no)
+                                ->where('status', 1)
+                                ->update(['status' => 0]);
+                        }
                     } else {
                         SalesReturn::where('invoice_id', $item->invoice_id)
                             ->where('product_id', $item->product_id)
@@ -615,7 +620,7 @@ class ItemReturnController extends Controller
                     $remainingToDeduct -= $deduct;
 
                     $stk = new StockTransaction();
-                    $stk->stock_master_id = 1;
+                    $stk->stock_master_id = 5;
                     $stk->inventory_id = $inv->id;
                     $stk->product_id = $item->product_id;
                     $stk->quantity = -$deduct;
@@ -624,6 +629,12 @@ class ItemReturnController extends Controller
                     $stk->created_by = $item->created_by;
                     $stk->status = 1;
                     $stk->save();
+                }
+
+                if (!empty($item->serial_no)) {
+                    \App\ProductWarrantySerial::where('serial_number', $item->serial_no)
+                        ->where('status', 0)
+                        ->update(['status' => 1]);
                 }
 
                 if ((float) $item->amount > 0) {

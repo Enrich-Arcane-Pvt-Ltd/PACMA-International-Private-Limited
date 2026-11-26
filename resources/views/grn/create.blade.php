@@ -3,7 +3,7 @@
     {{ __('GRN') }}
 @endsection
 @push('css-page')
-    <link rel="stylesheet" href="{{ asset('assets/css/grn-items.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/grn-items.css?v=2') }}">
 @endpush
 <style>
     .se-pre-con {
@@ -121,6 +121,10 @@
                     }
                     if (value[i].product_name) {
                         tr.attr('data-product-name', value[i].product_name);
+                        tr.find('.item_name').val(value[i].product_name);
+                    }
+                    if (value[i].product_model) {
+                        tr.find('.item_model').val(value[i].product_model);
                     }
                     changeItem(tr.find('.item'));
                 }
@@ -570,6 +574,8 @@
                     if (productObj.name || item.name) {
                         tr.attr('data-product-name', productObj.name || item.name || '');
                     }
+                    tr.find('.item_name').val(item.product_name || productObj.name || item.name || '');
+                    tr.find('.item_model').val(item.product_model || (productObj.brands && productObj.brands.name) || '');
                     $.ajax({
                         url: '{{ route('purchase-order.items') }}',
                         type: 'POST',
@@ -741,13 +747,7 @@
 
         })
 
-        // Cash Price typed by user -> auto calculate Retail Price (Cash Price + 38%), rounded to nearest integer
-        $(document).on('input', '.sale_price', function() {
-            var el = $(this).closest('tr');
-            var cash = parseFloat($(this).val()) || 0;
-            var retail = cash > 0 ? Math.round(cash * 1.38) : 0;
-            el.find('.hire_price').val(retail.toFixed(2));
-        });
+        // Selling Price is entered manually without auto-calculation
 
 
         $(document).on('click', '[data-repeater-create]', function() {
@@ -950,6 +950,8 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('Product Code') }}</th>
+                                        <th>{{ __('Item Name') }}</th>
+                                        <th>{{ __('Model') }}</th>
                                         <th class="text-center">{{ __('Unit Cost') }} ({{ $currencySymbol }})<span
                                                 class="text-danger"> *</span></th>
                                         {{-- <th>{{ __('Quantity') }}<span class="text-danger"> *</span></th> --}}
@@ -961,7 +963,7 @@
                                         <th class="text-center">{{ __('Cash Price') }} ({{ $currencySymbol }})<span
                                                 class="text-danger"> *</span>
                                         </th>
-                                        <th class="text-center">{{ __('Retail Price') }} ({{ $currencySymbol }})<span
+                                        <th class="text-center">{{ __('Selling Price') }} ({{ $currencySymbol }})<span
                                                 class="text-danger">
                                                 *</span> </th>
                                         <th class="text-center">{{ __('Amount') }} ({{ $currencySymbol }})</th>
@@ -977,9 +979,15 @@
                                         {{ Form::hidden('id', $item->id ?? null, ['class' => 'form-control id']) }}
                                         {{ Form::hidden('quantity', $item->quantity ?? null, ['class' => 'd-none']) }}
                                         {{-- @dd($item ?? '') --}}
-                                        <td width="20%">
-                                            {{ Form::select('item', $product_services, null, ['class' => 'form-control font-style item', 'data-url' => route('proposal.product'), 'readonly' => 'readonly', 'disabled' => 'disabled', 'style' => 'min-width: 10rem;']) }}
+                                        <td width="15%">
+                                            {{ Form::select('item', $product_services, null, ['class' => 'form-control font-style item', 'data-url' => route('proposal.product'), 'readonly' => 'readonly', 'disabled' => 'disabled', 'style' => 'min-width: 9rem;']) }}
                                             <div class="row-serial-storage d-none"></div>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control item_name" readonly tabindex="-1" style="min-width: 10rem;">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control item_model" readonly tabindex="-1" style="min-width: 8rem;">
                                         </td>
                                         <td>
                                             <div class="form-group">
@@ -1168,11 +1176,15 @@
                                         <td>&nbsp;</td>
                                         <td>&nbsp;</td>
                                         <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
                                         <td colspan="2"><strong>{{ __('Sub Total') }}</strong></td>
                                         <td class="text-right subTotal">0.00</td>
                                         <td></td>
                                     </tr>
                                     <tr>
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
                                         <td>&nbsp;</td>
                                         <td>&nbsp;</td>
                                         <td>&nbsp;</td>

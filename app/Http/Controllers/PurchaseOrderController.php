@@ -92,7 +92,11 @@ class PurchaseOrderController extends Controller
 
     public function productDetails(Request $request)
     {
-        $product = Product::with('productCategory', 'categoryDetails')->find($request->product_id);
+        $product = Product::with('productCategory', 'categoryDetails', 'brands')->find($request->product_id);
+        if ($product) {
+            $product->product_name = $product->name ?? '';
+            $product->product_model = optional($product->brands)->name ?? '';
+        }
         return json_encode($product);
     }
 

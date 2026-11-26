@@ -105,7 +105,7 @@
 
     <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="form-group">
-            {{ Form::label('product_brand', __('Brand'), ['class' => '']) }}<span class="text-danger">*</span>
+            {{ Form::label('product_brand', __('Model'), ['class' => '']) }}<span class="text-danger">*</span>
             <div class="input-group">
                 <div class="input-group-prepend">
                     <div class="input-group-text">

@@ -614,7 +614,7 @@
                                                     </tr>
                                                     <tr>
                                                         <td>{{ __('Received By') }}:</td>
-                                                        <td>{{ $receivedByName . 'ho' }}</td>
+                                                        <td>{{ $receivedByName }}</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -625,12 +625,11 @@
                                 <div data-v-f2a183a6="" class="d-body">
                                     <div data-v-f2a183a6="" class="d-bill-to">
                                         <div style="margin-top:-30px;" class="row">
-                                            <table style="max-width:400px;">
+                                            <table style="max-width:420px;">
                                                 <tr>
                                                     <td>Checked By</td>
-                                                    <td style="text-align:center;">
-                                                        ......................................</td>
-                                                    <td style="text-align:center;">......................</td>
+                                                    <td style="text-align:center; white-space:nowrap; padding: 0 12px;">......................</td>
+                                                    <td style="text-align:center; white-space:nowrap; padding: 0 12px;">......................</td>
                                                 </tr>
                                                 <tr>
                                                     <td></td>
@@ -660,7 +659,7 @@
                                                     <th class="w-2 centerText">{{ __('Quantity') }}</th>
                                                     <th class="w-3 centerText">{{ __('GRN Cost') }}</th>
                                                     <th class="w-3 centerText">{{ __('Cash Price') }}</th>
-                                                    <th class="w-3 centerText">{{ __('Retail Price') }}</th>
+                                                    <th class="w-3 centerText">{{ __('Selling Price') }}</th>
                                                     <th class="w-3 centerText">{{ __('Received Quantity') }}</th>
                                                     <th class="w-3 text-right">{{ __('Amount') }}</th>
                                                 </tr>

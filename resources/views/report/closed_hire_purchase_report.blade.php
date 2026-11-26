@@ -186,7 +186,7 @@
                                                 <th> {{ __('NIC Number') }}</th>
                                                 <th> {{ __('Customer') }}</th>
                                                 <th> {{ __('Cash Price') }} ({{ $currencySymbol }})</th>
-                                                <th> {{ __('Retail Price') }} ({{ $currencySymbol }})</th>
+                                                <th> {{ __('Selling Price') }} ({{ $currencySymbol }})</th>
                                                 <th> {{ __('Period') }}</th>
                                                 <th> {{ __('Interest Rate') }}</th>
                                                 <th> {{ __('Interest Amount') }} ({{ $currencySymbol }})</th>
