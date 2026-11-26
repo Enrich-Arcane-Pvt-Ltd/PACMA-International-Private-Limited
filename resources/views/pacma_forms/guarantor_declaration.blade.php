@@ -158,10 +158,23 @@
                     Miss. <span class="box">{{ $g2Title === 2 || $g2Title === '2' ? '✓' : '' }}</span>
                 </th>
             </tr>
+            @php
+                $fmtGName = function ($g) {
+                    if (!$g) return '';
+                    $name = trim((string)($g->name ?? ''));
+                    $full = trim((string)($g->full_name ?? ''));
+                    $biz = trim((string)($g->business_name ?? ''));
+                    $emp = trim((string)($g->employment_name ?? ''));
+                    if ($full !== '' && strcasecmp($full, $biz) !== 0 && strcasecmp($full, $emp) !== 0) {
+                        return $full;
+                    }
+                    return $name !== '' ? $name : $full;
+                };
+            @endphp
             <tr>
                 <td>01. සම්පූර්ණ නම (වාසගම සමඟ)<br>NAME IN FULL</td>
-                <td>{{ optional($g1)->full_name ?: (optional($g1)->name ?? '') }}</td>
-                <td>{{ optional($g2)->full_name ?: (optional($g2)->name ?? '') }}</td>
+                <td>{{ $fmtGName($g1) }}</td>
+                <td>{{ $fmtGName($g2) }}</td>
             </tr>
             <tr>
                 <td>02. ඔබ ගැණුම්කරු හඳුනන්නේ කුමන කාලයක සිටද?</td>

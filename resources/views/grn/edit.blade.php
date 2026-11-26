@@ -27,7 +27,7 @@
     {{ __('GRN') }}
 @endsection
 @push('css-page')
-    <link rel="stylesheet" href="{{ asset('assets/css/grn-items.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/grn-items.css?v=2') }}">
 @endpush
 <style>
     #sortable-table tbody td {
@@ -132,7 +132,9 @@
                         return String(this.value) === String(value[i].id);
                     }).closest('tr');
                     tr.find('.item').val(value[i].product_id);
-                    tr.find('.product-search').val(tr.find('.item option:selected').text());
+                    tr.find('.product-search').val(tr.find('.item option:selected').text().split(' - ')[0].trim());
+                    tr.find('.item_name').val((value[i].products && value[i].products.name) || '');
+                    tr.find('.item_model').val((value[i].products && value[i].products.brands && value[i].products.brands.name) || '');
                     tr.find('.item').data('previous-product', String(value[i].product_id));
                     tr.find('.quantity, .receive_quantity').val(parseInt(value[i].received_qty, 10) || 1);
                     tr.find('.amount').text((parseFloat(value[i].amount) || 0).toFixed(2));
@@ -210,6 +212,9 @@
                 cache: false,
                 success: function(data) {
                     var item = JSON.parse(data);
+                    var trRow = el.closest('tr');
+                    trRow.find('.item_name').val(item.product_name || (item.product && item.product.name) || '');
+                    trRow.find('.item_model').val(item.product_model || (item.product && item.product.brands && item.product.brands.name) || '');
                     // console.log('------------------------');
                     // console.log(item);
                     $.ajax({
@@ -321,10 +326,6 @@
 
         $(document).on('input', '.unit_cost', function() {
             $(this).closest('tr').find('.grn_cost').val($(this).val()).trigger('input');
-        });
-        $(document).on('input', '.sale_price', function() {
-            var cash = parseFloat($(this).val()) || 0;
-            $(this).closest('tr').find('.hire_price').val((cash > 0 ? Math.round(cash * 1.38) : 0).toFixed(2));
         });
 
         $(document).on('input', '.quantity', function () {
@@ -664,13 +665,15 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('Product Code') }}</th>
+                                        <th>{{ __('Item Name') }}</th>
+                                        <th>{{ __('Model') }}</th>
                                         <th>{{ __('Unit Cost') }}<span class="text-danger"> *</span> </th>
                                         <th>{{ __('Quantity') }}<span class="text-danger"> *</span></th>
                                         <th>{{ __('GRN Cost') }} ({{ $currencySymbol }})<span class="text-danger">*</span>
                                         </th>
                                         <th>{{ __('Cash Price') }} ({{ $currencySymbol }})<span
                                                 class="text-danger">*</span></th>
-                                        <th>{{ __('Retail Price') }} ({{ $currencySymbol }})<span
+                                        <th>{{ __('Selling Price') }} ({{ $currencySymbol }})<span
                                                 class="text-danger">*</span></th>
                                         <th>{{ __('Received Quantity') }}<span class="text-danger"> *</span></th>
                                         <th class="text-right">{{ __('Amount') }} ({{ $currencySymbol }})</th>
@@ -681,10 +684,16 @@
                                 <tbody class="ui-sortable" data-repeater-item>
                                     <tr>
                                         {{ Form::hidden('id', null, ['class' => 'form-control id']) }}
-                                        <td width="20%">
-                                            <input type="search" class="form-control product-search mb-1" placeholder="{{ __('Search name or barcode') }}" aria-label="{{ __('Search products by name or barcode') }}" autocomplete="off" style="min-width: 14rem;">
+                                        <td width="16%">
+                                            <input type="search" class="form-control product-search mb-1" placeholder="{{ __('Search name or barcode') }}" aria-label="{{ __('Search products by name or barcode') }}" autocomplete="off" style="min-width: 12rem;">
                                             <input type="hidden" name="batch_key" class="batch-key">
                                             {{ Form::select('item', $product_services, null, ['class' => 'item d-none', 'data-url' => route('proposal.product'), 'tabindex' => '-1', 'aria-hidden' => 'true']) }}
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control item_name" readonly tabindex="-1" style="min-width: 9rem;">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control item_model" readonly tabindex="-1" style="min-width: 7rem;">
                                         </td>
                                         <td>
                                             <div class="form-group">
@@ -803,13 +812,13 @@
 
                                 <tfoot>
                                     <tr>
-                                        <td colspan="5">&nbsp;</td>
+                                        <td colspan="7">&nbsp;</td>
                                         <td colspan="2"><strong>{{ __('Sub Total') }}</strong></td>
                                         <td class="text-right subTotal">0.00</td>
                                         <td></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="5">&nbsp;</td>
+                                        <td colspan="7">&nbsp;</td>
                                         <td colspan="2"><strong>{{ __('Total Amount') }}</strong></td>
                                         <td class="text-right totalAmount">0.00</td>
                                         <td></td>

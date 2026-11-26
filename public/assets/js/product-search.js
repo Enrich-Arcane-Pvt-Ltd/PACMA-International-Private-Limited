@@ -28,10 +28,13 @@
     function choose(option) {
         var input = activeInput;
         var select = sourceSelect(input);
-        input.value = option.text;
+        var isGrnTable = !!input.closest('.grn-items-table');
+        var displayVal = isGrnTable ? option.text.split(' - ')[0].trim() : option.text;
+        input.value = displayVal;
         input.title = option.text;
         if (input.classList.contains('product-search')) {
-            input.parentNode.querySelector('.selected-product-name').textContent = option.text;
+            var cap = input.parentNode.querySelector('.selected-product-name');
+            if (cap) cap.textContent = isGrnTable ? '' : option.text;
         }
         input.setCustomValidity('');
         if (select.value !== option.value) $(select).val(option.value).trigger('change');
@@ -92,6 +95,10 @@
         input.setAttribute('aria-expanded', 'false');
         input.required = true;
         if (input.classList.contains('product-search')) {
+            var isGrnTable = !!input.closest('.grn-items-table');
+            if (isGrnTable && select.value && input.value.indexOf(' - ') !== -1) {
+                input.value = input.value.split(' - ')[0].trim();
+            }
             var caption = input.parentNode.querySelector('.selected-product-name');
             if (!caption) {
                 caption = document.createElement('small');
@@ -99,8 +106,8 @@
                 caption.style.cssText = 'white-space:normal;overflow-wrap:anywhere;max-width:30rem;';
                 input.parentNode.appendChild(caption);
             }
-            caption.textContent = select.value ? input.value : '';
-            input.title = caption.textContent;
+            caption.textContent = (!isGrnTable && select.value) ? input.value : '';
+            input.title = select.value ? input.value : '';
         }
         input.setCustomValidity(select.value ? '' : validationMessage(input));
     }

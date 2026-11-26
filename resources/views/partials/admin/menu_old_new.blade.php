@@ -327,7 +327,7 @@ $company_small_logo=Utility::getValByName('company_small_logo');
                         @endcan
                         @can('manage product')
                             <li class="{{ (Request::route()->getName() == 'product-brand.index' ) ? ' active' : '' }}">
-                                <a class="nav-link" href="{{ route('product-brand.index') }}">{{ __('Brand') }}</a>
+                                <a class="nav-link" href="{{ route('product-brand.index') }}">{{ __('Model') }}</a>
                             </li>
                         @endcan
                         @can('manage product')

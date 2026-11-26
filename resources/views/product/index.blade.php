@@ -76,7 +76,7 @@
                                                             <th>{{ __('Name') }}</th>
                                                             {{-- <th>{{__('Serial Number')}}</th> --}}
                                                             <th>{{ __('Description') }}</th>
-                                                            <th>{{ __('Brand') }}</th>
+                                                            <th>{{ __('Model') }}</th>
                                                             <th>{{ __('Category') }}</th>
                                                             <th class="nowrap">{{ __('Sub Category') }}</th>
                                                             @if (Gate::check('edit product') || Gate::check('block product') || Gate::check('view product') || Auth::user()->canDeleteProduct())

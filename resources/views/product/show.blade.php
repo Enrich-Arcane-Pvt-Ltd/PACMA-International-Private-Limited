@@ -139,7 +139,7 @@
                                         <table class="table table-sm table-borderless mb-0">
                                             <tbody>
                                                 <tr>
-                                                    <th class="pl-0 w-25" scope="row"><strong>Brand</strong></th>
+                                                    <th class="pl-0 w-25" scope="row"><strong>Model</strong></th>
                                                     <td>{{ $product->productBrand->name ?? '-' }}</td>
                                                 </tr>
                                                 <tr>
@@ -268,7 +268,7 @@
                 $("#mdb-lightbox-ui").load("{{ asset('assets') }}/show/mdb-lightbox-ui.html");
             });
         });
-        $(document).addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
             const zoomLinks = document.querySelectorAll('.no-zoom a');
 
             zoomLinks.forEach(link => {

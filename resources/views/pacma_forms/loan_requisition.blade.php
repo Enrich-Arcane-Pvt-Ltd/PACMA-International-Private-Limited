@@ -193,17 +193,30 @@
             <tr>
                 <td colspan="6" style="height: 18px;"></td>
             </tr>
+            @php
+                $fmtGName = function ($g) {
+                    if (!$g) return '';
+                    $name = trim((string)($g->name ?? ''));
+                    $full = trim((string)($g->full_name ?? ''));
+                    $biz = trim((string)($g->business_name ?? ''));
+                    $emp = trim((string)($g->employment_name ?? ''));
+                    if ($full !== '' && strcasecmp($full, $biz) !== 0 && strcasecmp($full, $emp) !== 0) {
+                        return $full;
+                    }
+                    return $name !== '' ? $name : $full;
+                };
+            @endphp
             <tr>
                 <td colspan="2" class="label-cell">1st Guarantor's Name</td>
-                <td colspan="4">{{ optional($guarantors->values()->get(0))->full_name ?: (optional($guarantors->values()->get(0))->name ?? '') }}</td>
+                <td colspan="4">{{ $fmtGName($guarantors->values()->get(0)) }}</td>
             </tr>
             <tr>
                 <td colspan="2" class="label-cell">2nd Guarantor's Name</td>
-                <td colspan="4">{{ optional($guarantors->values()->get(1))->full_name ?: (optional($guarantors->values()->get(1))->name ?? '') }}</td>
+                <td colspan="4">{{ $fmtGName($guarantors->values()->get(1)) }}</td>
             </tr>
             <tr>
                 <td colspan="2" class="label-cell">3rd Guarantor's Name</td>
-                <td colspan="4">{{ optional($guarantors->values()->get(2))->full_name ?: (optional($guarantors->values()->get(2))->name ?? '') }}</td>
+                <td colspan="4">{{ $fmtGName($guarantors->values()->get(2)) }}</td>
             </tr>
             <tr>
                 <td colspan="2" class="label-cell">Sales Promoter Name &amp; Signature</td>

@@ -50,11 +50,30 @@ class SaleBatchCatalog
             try { $lineBatches[$line->id] = GrnStockBatch::find($line)->id; }
             catch (\Illuminate\Validation\ValidationException $e) { /* Do not guess legacy batch ownership. */ }
         }
+        $supplierReturnedSerials = \App\ItemReturn::where('product_id', $productId)
+            ->where('return_type', 'supplier')
+            ->where('status', 1)
+            ->whereNotNull('serial_no')
+            ->where('serial_no', '!=', '')
+            ->pluck('serial_no')
+            ->map(function ($s) { return trim((string) $s); })
+            ->filter()
+            ->values()
+            ->all();
+
         $units = ProductWarrantySerial::whereIn('grn_product_id', array_keys($lineBatches))
-            ->where(function ($query) use ($unitIds) { $query->where('status', 0)->orWhereIn('id', $unitIds); })
+            ->where(function ($query) use ($unitIds, $supplierReturnedSerials) {
+                $query->where(function ($q) use ($supplierReturnedSerials) {
+                    $q->where('status', 0);
+                    if (!empty($supplierReturnedSerials)) {
+                        $q->whereNotIn('serial_number', $supplierReturnedSerials);
+                    }
+                })->orWhereIn('id', $unitIds);
+            })
             ->orderBy('id')->get();
         $returnedBatchIds = \App\StockTransaction::whereIn('inventory_id', $batches->pluck('id'))
             ->where('stock_master_id', 5)
+            ->where('quantity', '>', 0)
             ->where('status', 1)
             ->pluck('inventory_id')
             ->flip();

@@ -57,8 +57,10 @@ class PacmaSummaryController extends Controller
 
         $documentFee = (float) $sales->sum('document_charges');
         $downPayment = (float) $sales->where('sale_type', 1)->sum('down_payment');
-        $cashSales = (float) $sales->where('sale_type', 0)->sum('total_amount');
-        $creditSales = (float) $sales->where('sale_type', 1)->sum('total_amount');
+        $cashSales = (float) $sales->where('sale_type', 0)->sum('net_amount');
+        $creditSales = (float) $sales->where('sale_type', 1)->sum(function ($s) {
+            return (float) ($s->total_due_amount ?? $s->outstanding_amount ?? $s->net_amount ?? 0);
+        });
         $grandTotal = $documentFee + $downPayment + $cashSales + $creditSales;
 
         // Grouped breakdown by date (or month for annual)
@@ -70,8 +72,10 @@ class PacmaSummaryController extends Controller
                 'label' => $period === 'annual' ? Carbon::parse($key . '-01')->format('F Y') : $key,
                 'document_fee' => (float) $rows->sum('document_charges'),
                 'down_payment' => (float) $rows->where('sale_type', 1)->sum('down_payment'),
-                'cash_sales' => (float) $rows->where('sale_type', 0)->sum('total_amount'),
-                'credit_sales' => (float) $rows->where('sale_type', 1)->sum('total_amount'),
+                'cash_sales' => (float) $rows->where('sale_type', 0)->sum('net_amount'),
+                'credit_sales' => (float) $rows->where('sale_type', 1)->sum(function ($s) {
+                    return (float) ($s->total_due_amount ?? $s->outstanding_amount ?? $s->net_amount ?? 0);
+                }),
                 'count' => $rows->count(),
             ];
         })->values();

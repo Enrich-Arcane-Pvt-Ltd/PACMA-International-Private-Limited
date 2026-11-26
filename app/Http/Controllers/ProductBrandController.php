@@ -62,7 +62,7 @@ class ProductBrandController extends Controller
             $product_brand->created_by = \Auth::user()->id;
             $product_brand->save();
 
-            return redirect()->route('product-brand.index')->with('success', __('Product brand successfully created !!!'));
+            return redirect()->route('product-brand.index')->with('success', __('Product model successfully created !!!'));
         }
         else
         {
@@ -118,7 +118,7 @@ class ProductBrandController extends Controller
                 $productBrand->name  = $request->name;
                 $productBrand->save();
 
-                return redirect()->route('product-brand.index')->with('success', __('Product brand successfully updated !!!'));
+                return redirect()->route('product-brand.index')->with('success', __('Product model successfully updated !!!'));
             // }
             // else
             // {
@@ -150,14 +150,14 @@ class ProductBrandController extends Controller
 
                 if(!empty($productBrand))
                 {
-                    return redirect()->back()->with('error', __('This brand is already assigned. So please remove this brand related data.'));
+                    return redirect()->back()->with('error', __('This model is already assigned. So please remove this model related data.'));
                 }
                 else
                 {
                     $productBrand = ProductBrand::find($id);
                     $productBrand->status = 0;
                     $productBrand->update();
-                    return redirect()->back()->with('success', __('Product brand successfully blocked !!!'));
+                    return redirect()->back()->with('success', __('Product model successfully blocked !!!'));
                 }
             // }
             // else
@@ -178,7 +178,7 @@ class ProductBrandController extends Controller
             $productBrand = ProductBrand::find($id);
             $productBrand->status = 1;
             $productBrand->update();
-            return redirect()->back()->with('success', __('Product brand successfully unblocked !!!'));
+            return redirect()->back()->with('success', __('Product model successfully unblocked !!!'));
         }
         else
         {

@@ -84,7 +84,7 @@
 
     <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="form-group">
-            {{ Form::label('product_category_id', __('Brand'), ['class' => '']) }}<span class="text-danger">*</span>
+            {{ Form::label('product_category_id', __('Model'), ['class' => '']) }}<span class="text-danger">*</span>
             <div class="input-group">
                 <div class="input-group-prepend">
                     <div class="input-group-text">
@@ -235,7 +235,7 @@
             onchange="uploadFile_1()" style="overflow: hidden;" accept="image/*" />
 
         <div class="image_container">
-            <img src="{{ $product->image_1 }}" id="image_preview_1" />
+            <img src="{{ !empty($product->image_1) ? asset($product->image_1) : '' }}" id="image_preview_1" />
         </div>
     </div>
 
@@ -245,7 +245,7 @@
             onchange="uploadFile_2()" style="overflow: hidden;" accept="image/*" />
 
         <div class="image_container">
-            <img src="{{ $product->image_2 }}" id="image_preview_2" />
+            <img src="{{ !empty($product->image_2) ? asset($product->image_2) : '' }}" id="image_preview_2" />
         </div>
     </div>
 
@@ -255,7 +255,7 @@
             onchange="uploadFile_3()" style="overflow: hidden;" accept="image/*" />
 
         <div class="image_container">
-            <img src="{{ $product->image_3 }}" id="image_preview_3" />
+            <img src="{{ !empty($product->image_3) ? asset($product->image_3) : '' }}" id="image_preview_3" />
         </div>
     </div>
 

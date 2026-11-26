@@ -1133,11 +1133,57 @@
             });
 
             $('#btn_use_my_location_edit').off('click.custMapEdit').on('click.custMapEdit', function () {
-                if (!navigator.geolocation) return;
-                navigator.geolocation.getCurrentPosition(function (pos) {
-                    setCoords(pos.coords.latitude, pos.coords.longitude);
-                    map.setView([pos.coords.latitude, pos.coords.longitude], 16);
-                });
+                var $btn = $(this);
+                var origHtml = $btn.html();
+                $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Locating...');
+
+                function restoreBtn() {
+                    $btn.prop('disabled', false).html(origHtml);
+                }
+
+                function fallbackByIp(reason) {
+                    fetch('https://get.geojs.io/v1/ip/geo.json')
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            var lat = parseFloat(data && data.latitude);
+                            var lng = parseFloat(data && data.longitude);
+                            if (!isNaN(lat) && !isNaN(lng)) {
+                                setCoords(lat, lng);
+                                map.setView([lat, lng], 14);
+                                if (typeof AppMessages !== 'undefined' && AppMessages.info) {
+                                    AppMessages.info('Approximate location set from your network. You can drag the pin to adjust.');
+                                }
+                            } else if (typeof AppMessages !== 'undefined' && AppMessages.warning) {
+                                AppMessages.warning(reason || 'Unable to detect your current location.');
+                            }
+                        })
+                        .catch(function () {
+                            if (typeof AppMessages !== 'undefined' && AppMessages.warning) {
+                                AppMessages.warning(reason || 'Unable to detect your current location. Please click on the map or drag the pin.');
+                            }
+                        })
+                        .finally(restoreBtn);
+                }
+
+                if (!navigator.geolocation) {
+                    fallbackByIp('Geolocation is not supported by your browser.');
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(
+                    function (pos) {
+                        setCoords(pos.coords.latitude, pos.coords.longitude);
+                        map.setView([pos.coords.latitude, pos.coords.longitude], 16);
+                        restoreBtn();
+                    },
+                    function (err) {
+                        var msg = (err && err.code === 1)
+                            ? 'Location permission denied or blocked on non-HTTPS connection.'
+                            : 'Could not get GPS location.';
+                        fallbackByIp(msg);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
             });
 
             setTimeout(function () { map.invalidateSize(); }, 300);

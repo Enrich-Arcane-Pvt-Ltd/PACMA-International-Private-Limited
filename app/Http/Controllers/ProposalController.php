@@ -100,9 +100,14 @@ class ProposalController extends Controller
         $data['product'] = $product = ProductService::with(['categoryDetails', 'category'])->find($request->product_id);
 
         if (!$product) {
-            $product = \App\Product::with(['productCategory', 'categoryDetails'])->find($request->product_id);
+            $product = \App\Product::with(['productCategory', 'categoryDetails', 'brands'])->find($request->product_id);
             $data['product'] = $product;
         }
+        $prodForMeta = ($product instanceof \App\Product)
+            ? $product->loadMissing('brands')
+            : \App\Product::with('brands')->find($request->product_id);
+        $data['product_name'] = $prodForMeta ? ($prodForMeta->name ?? '') : ($product ? ($product->name ?? '') : '');
+        $data['product_model'] = $prodForMeta ? (optional($prodForMeta->brands)->name ?? ($prodForMeta->model ?? '')) : '';
 
         $categoryName = '';
         if ($product) {

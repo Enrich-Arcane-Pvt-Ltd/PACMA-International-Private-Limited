@@ -15,10 +15,10 @@
                         <th>{{ __('Stock Value') }} ({{ $currencySymbol }})</th>
                         <th>{{ __('Purchase Price') }} ({{ $currencySymbol }})</th>
                         <th>{{ __('Cash Price') }} ({{ $currencySymbol }})</th>
-                        <th>{{ __('Retail Price') }} ({{ $currencySymbol }})</th>
+                        <th>{{ __('Selling Price') }} ({{ $currencySymbol }})</th>
                         <th>{{ __('Last Purchase Price') }} ({{ $currencySymbol }})</th>
                         <th>{{ __('Last Cash Price') }} ({{ $currencySymbol }})</th>
-                        <th>{{ __('Last Retail Price') }} ({{ $currencySymbol }})</th>
+                        <th>{{ __('Last Selling Price') }} ({{ $currencySymbol }})</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,7 +27,7 @@
                             <td>
                                 {{ $branch->name }}
                             </td>
-                            <td><a href="{{ route('stock.batch', $batch->id) }}" target="_blank" rel="noopener">B{{ str_pad($batch->id, 6, '0', STR_PAD_LEFT) }}</a><br>{{ $batch->supplier_invoice_number ?: $batch->grn_id }}<br><small>{{ $batch->status == 1 && $batch->remain_qty > 0 ? 'Available' : 'Closed / archived' }}</small></td>
+                            <td><a href="{{ route('stock.batch', $batch->id) }}" target="_blank" rel="noopener">B{{ str_pad($batch->id, 6, '0', STR_PAD_LEFT) }}</a><br>{{ $batch->supplier_invoice_number ?: $batch->grn_id }}<br><small>{{ optional($batch->grns)->approval_status === 'rejected' ? 'Rejected' : ($batch->status == 1 && $batch->remain_qty > 0 ? 'Available' : 'Closed / archived') }}</small></td>
                             <td>
                                 {{ $batch->remain_qty ?? '0' }}
                             </td>

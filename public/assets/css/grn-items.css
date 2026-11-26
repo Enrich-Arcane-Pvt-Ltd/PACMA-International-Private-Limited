@@ -2,40 +2,31 @@
 #sortable-table.grn-items-table {
     display: table;
     width: 100%;
-    min-width: 1200px;
-    table-layout: fixed;
+    min-width: 1380px;
+    table-layout: auto;
 }
 #sortable-table.grn-items-table thead th {
     white-space: nowrap !important;
     word-break: normal !important;
-    padding: 12px 10px !important;
+    padding: 12px 12px !important;
     line-height: 1.35 !important;
     vertical-align: middle !important;
 }
 #sortable-table.grn-items-table th,
 #sortable-table.grn-items-table td {
-    padding: 8px 8px;
+    padding: 10px 8px;
     font-size: 12px;
-    vertical-align: top;
-    white-space: normal;
+    vertical-align: middle;
+    white-space: nowrap;
 }
-#sortable-table.grn-items-table tbody td {
-    padding-top: 12px;
-}
-#sortable-table.grn-items-table th:first-child { width: 22%; }
-#sortable-table.grn-items-table th:nth-child(2),
-#sortable-table.grn-items-table th:nth-child(4),
-#sortable-table.grn-items-table th:nth-child(5),
-#sortable-table.grn-items-table th:nth-child(6),
-#sortable-table.grn-items-table th:nth-child(7) { width: 10%; }
-#sortable-table.grn-items-table th:nth-child(3) { width: 9%; }
-#sortable-table.grn-items-table th:nth-child(8) { width: 13%; }
-#sortable-table.grn-items-table th:last-child { width: 6%; }
+#sortable-table.grn-items-table td:nth-child(1) .form-control { min-width: 135px; }
+#sortable-table.grn-items-table td:nth-child(2) .form-control { min-width: 170px; }
+#sortable-table.grn-items-table td:nth-child(3) .form-control { min-width: 110px; }
 #sortable-table.grn-items-table .form-control {
     width: 100%;
-    min-width: 0 !important;
-    height: 34px;
-    padding: 5px 6px;
+    min-width: 95px;
+    height: 36px;
+    padding: 5px 8px;
     font-size: 12px;
 }
 #sortable-table.grn-items-table .selected-product-name {
@@ -44,19 +35,10 @@
 }
 #sortable-table.grn-items-table .btn-action {
     padding: 6px 8px;
-    min-width: 30px;
+    min-width: 32px;
 }
 
 /* Edit includes a separate ordered Quantity column. */
-#sortable-table.grn-edit-items { min-width: 1300px; }
-#sortable-table.grn-edit-items th:first-child { width: 22%; }
-#sortable-table.grn-edit-items th:nth-child(2),
-#sortable-table.grn-edit-items th:nth-child(4) { width: 9%; }
-#sortable-table.grn-edit-items th:nth-child(3),
-#sortable-table.grn-edit-items th:nth-child(7) { width: 6%; }
-#sortable-table.grn-edit-items th:nth-child(5),
-#sortable-table.grn-edit-items th:nth-child(6),
-#sortable-table.grn-edit-items th:nth-child(8),
-#sortable-table.grn-edit-items th:nth-child(9) { width: 10%; }
+#sortable-table.grn-edit-items { min-width: 1480px; }
 #sortable-table.grn-edit-items th:last-child { width: 8%; }
 #sortable-table.grn-edit-items .form-group { margin: 0; }

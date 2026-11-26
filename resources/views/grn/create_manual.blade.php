@@ -3,7 +3,7 @@
     {{ __('Create Manual GRN') }}
 @endsection
 @push('css-page')
-    <link rel="stylesheet" href="{{ asset('assets/css/grn-items.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/grn-items.css?v=2') }}">
 @endpush
 <style>
     .se-pre-con {
@@ -523,6 +523,8 @@
                     var isFurn = /furniture/i.test(catName) ? '1' : '0';
                     el.attr('data-is-furniture', isFurn);
                     el.attr('data-product-name', productObj.name || item.name || '');
+                    el.find('.item_name').val(item.product_name || productObj.name || item.name || '');
+                    el.find('.item_model').val(item.product_model || (productObj.brands && productObj.brands.name) || '');
 
                     $.ajax({
                         url: '{{ route('get_last_purchase_price') }}',
@@ -546,9 +548,9 @@
                             el.find('.unit_cost').val(unitCost.toFixed(2));
                             el.find('.grn_cost').val(unitCost.toFixed(2));
                             var cashPrice = parseFloat(item.sale_price || 0);
-                            var retailPrice = cashPrice > 0 ? Math.round(cashPrice * 1.38) : 0;
+                            var sellingPrice = parseFloat(item.hire_price || 0);
                             el.find('.sale_price').val(cashPrice.toFixed(2));
-                            el.find('.hire_price').val(retailPrice.toFixed(2));
+                            el.find('.hire_price').val(sellingPrice.toFixed(2));
 
                             var qty = parseFloat(el.find('.receive_quantity').val()) || 1;
                             el.find('.receive_quantity').val(qty);
@@ -573,13 +575,7 @@
             el.find('.grn_cost').val($(this).val()).trigger('input');
         });
 
-        // Cash Price typed by user -> auto calculate Retail Price (Cash Price + 38%), rounded to nearest integer
-        $(document).on('input', '.sale_price', function() {
-            var el = $(this).closest('tr');
-            var cash = parseFloat($(this).val()) || 0;
-            var retail = cash > 0 ? Math.round(cash * 1.38) : 0;
-            el.find('.hire_price').val(retail.toFixed(2));
-        });
+        // Selling Price is entered manually without auto-calculation
 
         $(document).on('input', '.receive_quantity, .grn_cost', function() {
             var el = $(this).closest('tr');
@@ -769,23 +765,31 @@
                                 <table class="table table-striped grn-items-table" data-repeater-list="items" id="sortable-table">
                                     <thead>
                                         <tr>
-                                            <th width="25%">{{ __('Product') }} <span class="text-danger">*</span></th>
-                                            <th class="text-center" width="10%">{{ __('Unit Cost') }} ({{ $currencySymbol }}) <span class="text-danger">*</span></th>
-                                            <th class="text-center" width="10%">{{ __('Received Qty') }} <span class="text-danger">*</span></th>
-                                            <th class="text-center" width="10%">{{ __('GRN Cost') }} ({{ $currencySymbol }}) <span class="text-danger">*</span></th>
-                                            <th class="text-center" width="10%">{{ __('Cash Price') }} ({{ $currencySymbol }}) <span class="text-danger">*</span></th>
-                                            <th class="text-center" width="10%">{{ __('Retail Price') }} ({{ $currencySymbol }}) <span class="text-danger">*</span></th>
-                                            <th class="text-center" width="12%">{{ __('Amount') }} ({{ $currencySymbol }})</th>
-                                            <th width="8%">{{ __('Serial & Warranty') }}</th>
-                                            <th width="5%">{{ __('Action') }}</th>
+                                            <th>{{ __('Product Code') }} <span class="text-danger">*</span></th>
+                                            <th>{{ __('Item Name') }}</th>
+                                            <th>{{ __('Model') }}</th>
+                                            <th class="text-center">{{ __('Unit Cost') }} ({{ $currencySymbol }}) <span class="text-danger">*</span></th>
+                                            <th class="text-center">{{ __('Received Qty') }} <span class="text-danger">*</span></th>
+                                            <th class="text-center">{{ __('GRN Cost') }} ({{ $currencySymbol }}) <span class="text-danger">*</span></th>
+                                            <th class="text-center">{{ __('Cash Price') }} ({{ $currencySymbol }}) <span class="text-danger">*</span></th>
+                                            <th class="text-center">{{ __('Selling Price') }} ({{ $currencySymbol }}) <span class="text-danger">*</span></th>
+                                            <th class="text-center">{{ __('Amount') }} ({{ $currencySymbol }})</th>
+                                            <th class="text-center">{{ __('Serial & Warranty') }}</th>
+                                            <th class="text-center">{{ __('Action') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="ui-sortable" data-repeater-item>
                                         <tr>
                                             <td>
-                                                <input type="search" class="form-control product-search mb-1" placeholder="{{ __('Search name or barcode') }}" aria-label="{{ __('Search products by name or barcode') }}" autocomplete="off">
+                                                <input type="search" class="form-control product-search" placeholder="{{ __('Search name or barcode') }}" aria-label="{{ __('Search products by name or barcode') }}" autocomplete="off" style="min-width: 9rem;">
                                                 {{ Form::select('item', $product_services, null, ['class' => 'item d-none', 'tabindex' => '-1', 'aria-hidden' => 'true']) }}
                                                 <div class="row-serial-storage d-none"></div>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control item_name" readonly tabindex="-1" style="min-width: 11rem;">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control item_model" readonly tabindex="-1" style="min-width: 8rem;">
                                             </td>
                                             <td>
                                                 {{ Form::text('unit_cost', '0.00', ['class' => 'text-center form-control unit_cost', 'required' => 'required', 'style' => 'min-width: 5rem;']) }}
@@ -824,7 +828,7 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="5"></td>
+                                            <td colspan="7"></td>
                                             <td class="text-right"><b>{{ __('Total Amount') }} ({{ $currencySymbol }}):</b></td>
                                             <td class="text-right">
                                                 <span class="totalAmount font-weight-bold">0.00</span>

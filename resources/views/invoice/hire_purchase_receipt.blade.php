@@ -276,24 +276,22 @@
                         <tfoot>
                             <tr>
                                 <th colspan="4">
-                                    <table>
-                                        <tr style="text-align: left;">
-                                            <th>Warranty Card No :
+                                    <table style="width: 100%;">
+                                        <tr>
+                                            <th style="text-align: left;">Warranty Card No :
                                                 {{ $hirePurchaseDetail->warranty->warranty_number ?? '' }}</th>
+                                            <th style="text-align: right;">
+                                                @if ($advancePaymentDetail)
+                                                    Advance Payment Date : {{ $advancePaymentDetail->advance_date ?? '' }}
+                                                @endif
+                                            </th>
                                         </tr>
 
                                         <tr style="text-align: left;">
-                                            <th>
+                                            <th colspan="2">
                                                 <p>{{ $hirePurchaseDetail->additional_warranty_description ?? '' }}</p>
                                             </th>
                                         </tr>
-                                        @if ($advancePaymentDetail)
-                                            <tr style="text-align: left;">
-                                                <th>Advance Payment Date :
-                                                    {{ $advancePaymentDetail->advance_date ?? '' }}
-                                                </th>
-                                            </tr>
-                                        @endif
                                     </table>
                                 </th>
                             </tr>

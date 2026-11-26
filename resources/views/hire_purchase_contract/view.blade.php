@@ -270,6 +270,39 @@
                                         </address>
                                     @endif
                                 </div>
+                                <div class="col-md-4">
+                                    @if (!empty($sales->guarantor_3_id) && $sales->guarantor3)
+                                        <address>
+                                            <strong>{{ __('Guarantor 3 ') }}:</strong><br>
+                                            @if ($sales->guarantor3->title == 0)
+                                                Mr.
+                                            @elseif($sales->guarantor3->title == 1)
+                                                Mrs.
+                                            @else
+                                                Miss.
+                                            @endif
+                                            {{ !empty($sales->guarantor3->name) ? $sales->guarantor3->name : '' }}<br>
+                                            {{ !empty($sales->guarantor3->phone) ? $sales->guarantor3->phone : '' }}<br>
+                                            @php
+                                                $g3HouseNo = !empty($sales->guarantor3->house_no) ? trim($sales->guarantor3->house_no) : '';
+                                                $g3Address = !empty($sales->guarantor3->address) ? trim($sales->guarantor3->address) : '';
+                                                $g3FullAddress = $g3Address;
+                                                if (!empty($g3HouseNo)) {
+                                                    $cleanG3HouseNo = trim($g3HouseNo, ", \t\n\r\0\x0B");
+                                                    if (empty($g3Address)) {
+                                                        $g3FullAddress = $g3HouseNo;
+                                                    } elseif ($cleanG3HouseNo !== '' && stripos($g3Address, $cleanG3HouseNo) === false) {
+                                                        $formattedG3HouseNo = rtrim($cleanG3HouseNo, ',') . ',';
+                                                        $g3FullAddress = $formattedG3HouseNo . ' ' . $g3Address;
+                                                    }
+                                                }
+                                            @endphp
+                                            {{ !empty($g3FullAddress) ? $g3FullAddress : '' }}<br>
+                                            {{ !empty($sales->guarantor3->nic_no) ? $sales->guarantor3->nic_no : '' }}<br>
+                                            {{ !empty($sales->guarantor3->email) ? $sales->guarantor3->email : '' }}
+                                        </address>
+                                    @endif
+                                </div>
                             </div>
 
                         </div>

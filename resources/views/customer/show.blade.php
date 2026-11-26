@@ -227,6 +227,49 @@
                                 </div>
                             </div>
 
+                            @php
+                                $cd = $customer->details;
+                                $genderText = 'N/A';
+                                if (isset($cd->gender)) {
+                                    if ($cd->gender == 1) $genderText = __('Male');
+                                    elseif ($cd->gender == 2) $genderText = __('Female');
+                                }
+                                $svcYears = (int) ($cd->service_duration_years ?? 0);
+                                $svcMonths = (int) ($cd->service_duration_months ?? 0);
+                                $svcText = ($svcYears > 0 || $svcMonths > 0)
+                                    ? trim(($svcYears > 0 ? $svcYears . ' ' . ($svcYears === 1 ? 'Year' : 'Years') : '') . ' ' . ($svcMonths > 0 ? $svcMonths . ' ' . ($svcMonths === 1 ? 'Month' : 'Months') : ''))
+                                    : 'N/A';
+                            @endphp
+                            <h4 class="sub-title mt-4">{{ __('Application Form Additional Details') }}</h4>
+                            <div class="row mb-3">
+                                <div class="col-md-4 mb-3">
+                                    <span><b>{{ __('Gender') }}: </b>{{ $genderText }}</span><br>
+                                    <span><b>{{ __('Group No.') }}: </b>{{ $cd->group_no ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __('Resident Period (Years)') }}: </b>{{ $cd->resident_period ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __('Preferred Payment Date') }}: </b>{{ $cd->preferred_payment_date ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __('Service Duration') }}: </b>{{ $svcText }}</span><br>
+                                    <span><b>{{ __('Office Telephone No.') }}: </b>{{ $cd->phone_office ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __('Monthly Income') }}: </b>{{ !empty($cd->monthly_income) ? number_format((float)$cd->monthly_income, 2) : 'N/A' }}</span><br>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <span><b>{{ __('Other Income') }}: </b>{{ $cd->any_other_income_details ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __('Other Liabilities Company') }}: </b>{{ $cd->other_loan_company ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __('Other Liabilities Amount') }}: </b>{{ !empty($cd->other_loan_amount) ? number_format((float)$cd->other_loan_amount, 2) : 'N/A' }}</span><br>
+                                    <span><b>{{ __("Spouse's Name & Address") }}: </b>{{ $cd->spouse_name_address ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __("Spouse's Telephone No.") }}: </b>{{ $cd->spouse_phone ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __("Spouse's Occupation") }}: </b>{{ $cd->spouse_occupation ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __("Spouse's Office Address") }}: </b>{{ $cd->spouse_office_address ?? 'N/A' }}</span><br>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <span><b>{{ __("Spouse's Income") }}: </b>{{ $cd->spouse_income ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __("Parents' Name") }}: </b>{{ $cd->parents_name ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __("Parents' Address") }}: </b>{{ $cd->parents_address ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __("Relation's Name, Address & Phone Number") }}: </b>{{ $cd->relation_details ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __('Relation') }}: </b>{{ $cd->relation_type ?? 'N/A' }}</span><br>
+                                    <span><b>{{ __('Route to Residence') }}: </b>{{ $cd->route_to_residence ?? 'N/A' }}</span><br>
+                                </div>
+                            </div>
+
                             <h4 class="sub-title mt-4">{{ __('Customer Summary') }}</h4>
 
                             <div class="row custmer-detail-wrap">
